@@ -53,7 +53,7 @@ function Header() {
             <span>
               <Link to="/">
                 <button className="logout-button" onClick={handleLogout}>
-                  Logout
+                  Home
                 </button>
               </Link>
             </span>

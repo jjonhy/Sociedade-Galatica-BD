@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Container, Form } from "reactstrap";
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import "./Login.css";
 
 const Login = () => {
@@ -8,6 +9,9 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+
+  // Hook to use history for navigation
+  const navigate = useNavigate();
 
   // Event handlers
   const handleUsernameChange = (e) => {
@@ -33,6 +37,17 @@ const Login = () => {
       console.log(password)
       if (response.status === 200) {
         setMessage('Login successful');
+        const role_response = await axios.post('http://localhost:5000/role', { username });
+        const role = role_response.data.role;
+        if (role === 'OFICIAL') {
+          navigate('/oficial');
+        } else if (role === 'LIDER') {
+          navigate('/lider');
+        } else if (role === 'CIENTISTA') {
+          navigate('/cientista');
+        } else if (role === 'COMANDANTE') {
+          navigate('/comandante');
+        }
       }
     } catch (error) {
       // Handle Axios error response

@@ -33,5 +33,24 @@ def login():
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
 
+@app.route('/role', methods=['POST'])  # Usando POST para receber JSON no corpo da requisição
+def get_role():
+    data = request.json
+    cpi = data.get('username')
+    
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                sql = "SELECT cargo FROM LIDER WHERE CPI = :cpi"
+                cursor.execute(sql, {'cpi': cpi})
+                result = cursor.fetchone()
+                
+                if result:
+                    return jsonify({"role": result[0]}), 200
+                else:
+                    return jsonify({"message": "Role not found"}), 404
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+  
 if __name__ == '__main__':
     app.run(debug=True)
