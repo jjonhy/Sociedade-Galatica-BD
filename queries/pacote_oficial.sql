@@ -9,36 +9,38 @@ CREATE OR REPLACE PACKAGE BODY PacoteOficial AS
         c_return SYS_REFCURSOR;
         BEGIN
             OPEN c_return FOR
-                SELECT *, SUM(QTD_HABITANTES) OVER (ORDER BY DATA ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS HAB_ATUAL FROM (
-                    SELECT P.ID_ASTRO AS PLANETA, C.ESPECIE, F.NOME AS FACCAO, S.NOME AS SISTEMA, C.QTD_HABITANTES, H.DATA_INI AS DATA
-                        FROM COMUNIDADE C
-                        JOIN HABITACAO H ON C.NOME = H.COMUNIDADE AND C.ESPECIE = H.ESPECIE
-                        JOIN PLANETA P ON H.PLANETA = P.ID_ASTRO
-                        JOIN DOMINANCIA D ON P.ID_ASTRO = D.PLANETA
-                        JOIN NACAO N ON D.NACAO = N.NOME
-                        JOIN NACAO_FACCAO NF ON N.NOME = NF.NACAO
-                        JOIN FACCAO F ON NF.FACCAO = F.NOME
-                        JOIN LIDER L ON F.LIDER = L.CPI
-                        LEFT JOIN ORBITA_PLANETA OP ON P.ID_ASTRO = OP.PLANETA
-                        LEFT JOIN ESTRELA E ON OP.ESTRELA = E.ID_ESTRELA
-                        LEFT JOIN SISTEMA S ON E.ID_ESTRELA = S.NOME
-                        WHERE L.CPI = p_oficial
-                    UNION
-                    SELECT P.ID_ASTRO AS PLANETA, C.ESPECIE, F.NOME AS FACCAO, S.NOME AS SISTEMA, -C.QTD_HABITANTES, H.DATA_INI AS DATA
-                        FROM COMUNIDADE C
-                        JOIN HABITACAO H ON C.NOME = H.COMUNIDADE AND C.ESPECIE = H.ESPECIE
-                        JOIN PLANETA P ON H.PLANETA = P.ID_ASTRO
-                        JOIN DOMINANCIA D ON P.ID_ASTRO = D.PLANETA
-                        JOIN NACAO N ON D.NACAO = N.NOME
-                        JOIN NACAO_FACCAO NF ON N.NOME = NF.NACAO
-                        JOIN FACCAO F ON NF.FACCAO = F.NOME
-                        JOIN LIDER L ON F.LIDER = L.CPI
-                        LEFT JOIN ORBITA_PLANETA OP ON P.ID_ASTRO = OP.PLANETA
-                        LEFT JOIN ESTRELA E ON OP.ESTRELA = E.ID_ESTRELA
-                        LEFT JOIN SISTEMA S ON E.ID_ESTRELA = S.NOME
-                        WHERE L.CPI = p_oficial)
-                WHERE DATA IS NOT NULL
-                ORDER BY DATA;
+                SELECT PLANETA, ESPECIE, FACCAO, SISTEMA, DATA, SUM(QTD_HABITANTES) OVER (ORDER BY DATA ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS HAB_ATUAL
+                    FROM (
+                        SELECT P.ID_ASTRO AS PLANETA, C.ESPECIE, F.NOME AS FACCAO, S.NOME AS SISTEMA, C.QTD_HABITANTES, H.DATA_INI AS DATA
+                            FROM COMUNIDADE C
+                            JOIN HABITACAO H ON C.NOME = H.COMUNIDADE AND C.ESPECIE = H.ESPECIE
+                            JOIN PLANETA P ON H.PLANETA = P.ID_ASTRO
+                            JOIN DOMINANCIA D ON P.ID_ASTRO = D.PLANETA
+                            JOIN NACAO N ON D.NACAO = N.NOME
+                            JOIN NACAO_FACCAO NF ON N.NOME = NF.NACAO
+                            JOIN FACCAO F ON NF.FACCAO = F.NOME
+                            JOIN LIDER L ON F.LIDER = L.CPI
+                            LEFT JOIN ORBITA_PLANETA OP ON P.ID_ASTRO = OP.PLANETA
+                            LEFT JOIN ESTRELA E ON OP.ESTRELA = E.ID_ESTRELA
+                            LEFT JOIN SISTEMA S ON E.ID_ESTRELA = S.NOME
+                            WHERE L.CPI = '111.111.111-15'
+                        UNION
+                        SELECT P.ID_ASTRO AS PLANETA, C.ESPECIE, F.NOME AS FACCAO, S.NOME AS SISTEMA, -C.QTD_HABITANTES, H.DATA_FIM AS DATA
+                            FROM COMUNIDADE C
+                            JOIN HABITACAO H ON C.NOME = H.COMUNIDADE AND C.ESPECIE = H.ESPECIE
+                            JOIN PLANETA P ON H.PLANETA = P.ID_ASTRO
+                            JOIN DOMINANCIA D ON P.ID_ASTRO = D.PLANETA
+                            JOIN NACAO N ON D.NACAO = N.NOME
+                            JOIN NACAO_FACCAO NF ON N.NOME = NF.NACAO
+                            JOIN FACCAO F ON NF.FACCAO = F.NOME
+                            JOIN LIDER L ON F.LIDER = L.CPI
+                            LEFT JOIN ORBITA_PLANETA OP ON P.ID_ASTRO = OP.PLANETA
+                            LEFT JOIN ESTRELA E ON OP.ESTRELA = E.ID_ESTRELA
+                            LEFT JOIN SISTEMA S ON E.ID_ESTRELA = S.NOME
+                            WHERE L.CPI = '111.111.111-15')
+                    WHERE DATA IS NOT NULL
+                    ORDER BY DATA;
+
             RETURN c_return;
 
         EXCEPTION
@@ -48,8 +50,9 @@ CREATE OR REPLACE PACKAGE BODY PacoteOficial AS
 END;
 
 
-SELECT DATA, SUM(QTD_HABITANTES) OVER (ORDER BY DATA ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS HAB_ATUAL FROM (
-    SELECT C.QTD_HABITANTES, H.DATA_INI AS DATA
+SELECT PLANETA, ESPECIE, FACCAO, SISTEMA, SUM(QTD_HABITANTES) OVER (ORDER BY DATA ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS HAB_ATUAL
+FROM (
+    SELECT P.ID_ASTRO AS PLANETA, C.ESPECIE, F.NOME AS FACCAO, S.NOME AS SISTEMA, C.QTD_HABITANTES, H.DATA_INI AS DATA
         FROM COMUNIDADE C
         JOIN HABITACAO H ON C.NOME = H.COMUNIDADE AND C.ESPECIE = H.ESPECIE
         JOIN PLANETA P ON H.PLANETA = P.ID_ASTRO
@@ -58,9 +61,12 @@ SELECT DATA, SUM(QTD_HABITANTES) OVER (ORDER BY DATA ROWS BETWEEN UNBOUNDED PREC
         JOIN NACAO_FACCAO NF ON N.NOME = NF.NACAO
         JOIN FACCAO F ON NF.FACCAO = F.NOME
         JOIN LIDER L ON F.LIDER = L.CPI
+        LEFT JOIN ORBITA_PLANETA OP ON P.ID_ASTRO = OP.PLANETA
+        LEFT JOIN ESTRELA E ON OP.ESTRELA = E.ID_ESTRELA
+        LEFT JOIN SISTEMA S ON E.ID_ESTRELA = S.NOME
         WHERE L.CPI = '111.111.111-15'
     UNION
-    SELECT -C.QTD_HABITANTES, H.DATA_FIM AS DATA
+    SELECT P.ID_ASTRO AS PLANETA, C.ESPECIE, F.NOME AS FACCAO, S.NOME AS SISTEMA, -C.QTD_HABITANTES, H.DATA_FIM AS DATA
         FROM COMUNIDADE C
         JOIN HABITACAO H ON C.NOME = H.COMUNIDADE AND C.ESPECIE = H.ESPECIE
         JOIN PLANETA P ON H.PLANETA = P.ID_ASTRO
@@ -69,9 +75,14 @@ SELECT DATA, SUM(QTD_HABITANTES) OVER (ORDER BY DATA ROWS BETWEEN UNBOUNDED PREC
         JOIN NACAO_FACCAO NF ON N.NOME = NF.NACAO
         JOIN FACCAO F ON NF.FACCAO = F.NOME
         JOIN LIDER L ON F.LIDER = L.CPI
+        LEFT JOIN ORBITA_PLANETA OP ON P.ID_ASTRO = OP.PLANETA
+        LEFT JOIN ESTRELA E ON OP.ESTRELA = E.ID_ESTRELA
+        LEFT JOIN SISTEMA S ON E.ID_ESTRELA = S.NOME
         WHERE L.CPI = '111.111.111-15')
 WHERE DATA IS NOT NULL
 ORDER BY DATA;
+
+
 select * from HABITACAO;
 
 SELECT *
@@ -99,4 +110,23 @@ JOIN FACCAO F ON NF.FACCAO = F.NOME
 JOIN LIDER L ON F.LIDER = L.CPI
 WHERE L.CPI = '111.111.111-15';
 
-select * from DOMINANCIA
+select * from DOMINANCIA;
+
+-- teste evolucao_habitantes('111.111.111-15');
+DECLARE
+    p_cursor SYS_REFCURSOR;
+    v_planeta PLANETA.ID_ASTRO%TYPE;
+    v_especie COMUNIDADE.ESPECIE%TYPE;
+    v_facco FACCAO.NOME%TYPE;
+    v_sistema SISTEMA.NOME%TYPE;
+    v_data HABITACAO.DATA_INI%TYPE;
+    v_hab_atual integer;
+BEGIN
+    p_cursor := PacoteOficial.evolucao_habitantes('111.111.111-15');
+    LOOP
+        FETCH p_cursor INTO v_planeta, v_especie, v_facco, v_sistema, v_data, v_hab_atual;
+        EXIT WHEN p_cursor%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Planeta: ' || v_planeta || ' Especie: ' || v_especie || ' Faccao: ' || v_facco || ' Sistema: ' || v_sistema || ' Data: ' || v_data || ' Habitantes: ' || v_hab_atual);
+    END LOOP;
+    CLOSE p_cursor;
+END;
