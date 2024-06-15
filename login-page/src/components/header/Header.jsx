@@ -2,6 +2,8 @@ import React, { useContext } from "react";
 import { Container } from "reactstrap";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from 'react-router-dom';
+
 import "./Header.css";
 
 const navLinks = [
@@ -11,15 +13,16 @@ const navLinks = [
   { title: "Oficial", url: "oficial", role: "OFICIAL" },
 ];
 
-const handleLogout = () => {
-  console.log("Logging out");
-};
+const Header = () => {
+  const navigate = useNavigate();
 
-function Header() {
   const { isAuthenticated, role } = useContext(AuthContext);
 
-  console.log("isAuthenticated:", isAuthenticated);
-  console.log("role:", role);
+  const handleLogout = () => {
+    console.log("Logging out");
+    localStorage.removeItem('username');
+    navigate('/');
+  };
 
   return (
     <header>
@@ -51,19 +54,19 @@ function Header() {
               ))}
             </ul>
           </div>
-          <div className="user_icon">
-            <span>
-              <Link to="/">
+          {isAuthenticated && (
+            <div className="user_icon">
+              <span>
                 <button className="logout-button" onClick={handleLogout}>
                   Logout
                 </button>
-              </Link>
-            </span>
-          </div>
+              </span>
+            </div>
+          )}
         </div>
       </Container>
     </header>
   );
-}
+};
 
 export default Header;

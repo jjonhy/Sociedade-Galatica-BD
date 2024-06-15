@@ -7,6 +7,8 @@ import { Lider } from "./components/roles/Lider";
 import { Cientista } from "./components/roles/Cientista";
 import { Comandante } from "./components/roles/Comandante";
 import { Oficial } from "./components/roles/Oficial";
+import GerenciarEstrelas from "./components/roles/GerenciarEstrelas";
+import Relatorios from "./components/roles/Relatorios";
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
             <Route path="/login-page" element={<Login />} />
             <Route path="/lider" element={<Lider />} />
             <Route path="/cientista" element={<Cientista />} />
+            <Route path="/cientista/gerenciar-estrelas" element={<GerenciarEstrelas />} />
+            <Route path="/cientista/relatorios" element={<Relatorios />} />
             <Route path="/comandante" element={<Comandante />} />
             <Route path="/oficial" element={<Oficial />} />
           </Routes>

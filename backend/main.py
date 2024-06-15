@@ -29,7 +29,7 @@ def login():
                 result = cursor.fetchone()
                 if result:
                     session['username'] = username  # Armazena o username na sessão
-                    return jsonify({"message": "Login successful", "userid": result[0]}), 200
+                    return jsonify({"message": "Login successful", "username": username}), 200
                 else:
                     return jsonify({"message": "Invalid credentials"}), 401
     except Exception as e:
@@ -73,5 +73,22 @@ def check_auth():
     else:
         return jsonify({"message": "User not authenticated"}), 401
 
+@app.route('/username', methods=['POST'])
+def username():
+    username = request.json.get('username')  
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                sql = "SELECT nome FROM LIDER WHERE CPI = :username"
+                cursor.execute(sql, [username])
+                result = cursor.fetchone()
+                if result:
+                    return jsonify({"name": result[0]}), 200
+                else:
+                    return jsonify({"message": "Name not found"}), 404
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+
+    
 if __name__ == '__main__':
     app.run(debug=True)

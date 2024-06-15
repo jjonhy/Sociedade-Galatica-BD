@@ -22,44 +22,44 @@ const Login = () => {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Basic input validation
-    if (!username || !password) {
-      setMessage('Username and password are required.');
-      return;
-    }
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  // Basic input validation
+  if (!username || !password) {
+    setMessage('Username and password are required.');
+    return;
+  }
 
-    try {
-      const response = await axios.post('http://localhost:5000/login', { username, password });
-      console.log(username)
-      console.log(password)
-      if (response.status === 200) {
-        setMessage('Login successful');
-        const role_response = await axios.post('http://localhost:5000/role', { username });
-        const role = role_response.data.role;
-        if (role === 'OFICIAL') {
-          navigate('/oficial');
-        } else if (role === 'LIDER') {
-          navigate('/lider');
-        } else if (role === 'CIENTISTA') {
-          navigate('/cientista');
-        } else if (role === 'COMANDANTE') {
-          navigate('/comandante');
-        }
-      }
-    } catch (error) {
-      // Handle Axios error response
-      if (error.response) {
-        setMessage(error.response.data.message || 'An error occurred. Please try again later.');
-      } else if (error.request) {
-        setMessage('No response received from server. Please try again later.');
-      } else {
-        setMessage('An error occurred. Please try again later.');
+  try {
+    const response = await axios.post('http://localhost:5000/login', { username, password });
+    if (response.status === 200) {
+      setMessage('Login successful');
+      localStorage.setItem('username', username); // Armazena o username no localStorage
+      const role_response = await axios.post('http://localhost:5000/role', { username });
+      const role = role_response.data.role;
+      if (role === 'OFICIAL') {
+        navigate('/oficial');
+      } else if (role === 'LIDER') {
+        navigate('/lider');
+      } else if (role === 'CIENTISTA ') { // Espaço mantido conforme mencionado
+        navigate('/cientista');
+      } else if (role === 'COMANDANTE') {
+        navigate('/comandante');
       }
     }
-  };
+  } catch (error) {
+    // Handle Axios error response
+    if (error.response) {
+      setMessage(error.response.data.message || 'An error occurred. Please try again later.');
+    } else if (error.request) {
+      setMessage('No response received from server. Please try again later.');
+    } else {
+      setMessage('An error occurred. Please try again later.');
+    }
+  }
+};
+
 
   return (
     <section className="Form">
