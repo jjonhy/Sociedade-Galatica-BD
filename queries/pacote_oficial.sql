@@ -1,44 +1,55 @@
-
 CREATE OR REPLACE PACKAGE PacoteOficial AS
-    FUNCTION habitantes_por_planeta(p_oficial lider.cpi%TYPE) RETURN SYS_REFCURSOR;
+    FUNCTION evolucao_habitantes(p_oficial lider.cpi%TYPE) RETURN SYS_REFCURSOR;
 END;
 /
 CREATE OR REPLACE PACKAGE BODY PacoteOficial AS
 -- cada linha de habilitacao gera duas linhas uma para inicio e outra para fim usando uma union, a linha com fim tem a
 -- qtd de habitantes negativa, assim qnd gerar o relatorio vai ficar com a qtd de habitantes correta
-    FUNCTION habitantes_por_planeta(p_oficial lider.cpi%TYPE) RETURN SYS_REFCURSOR IS
+    FUNCTION evolucao_habitantes(p_oficial lider.cpi%TYPE) RETURN SYS_REFCURSOR IS
         c_return SYS_REFCURSOR;
         BEGIN
             OPEN c_return FOR
-                SELECT *
-                FROM COMUNIDADE C
-                JOIN HABITACAO H ON C.NOME = H.COMUNIDADE AND C.ESPECIE = H.ESPECIE
-                JOIN PLANETA P ON H.PLANETA = P.ID_ASTRO
-                JOIN DOMINANCIA D ON P.ID_ASTRO = D.PLANETA
-                JOIN NACAO N ON D.NACAO = N.NOME
-                JOIN LIDER L ON N.NOME = L.NACAO
-                WHERE L.CPI = p_oficial;
---                 SELECT H.PLANETA, P.ID_ASTRO, P.QTD_HABITANTES, H.DATA_INICIO
---                 FROM HABITACAO H
---                 JOIN PLANETA P ON H.PLANETA = P.ID_ASTRO
---                 JOIN LIDER L ON H.OFICIAL = L.CPI
---                 WHERE H.OFICIAL = p_oficial
---                 UNION
---                 SELECT H.PLANETA, P.NOME, -P.QTD_HABITANTES, H.DATA_FIM
---                 FROM HABITACAO H
---                 JOIN PLANETA P ON H.PLANETA = P.ID_ASTRO
---                 JOIN LIDER L ON H.OFICIAL = L.CPI
---                 WHERE H.OFICIAL = p_oficial;
+                SELECT *, SUM(QTD_HABITANTES) OVER (ORDER BY DATA ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS HAB_ATUAL FROM (
+                    SELECT P.ID_ASTRO AS PLANETA, C.ESPECIE, F.NOME AS FACCAO, S.NOME AS SISTEMA, C.QTD_HABITANTES, H.DATA_INI AS DATA
+                        FROM COMUNIDADE C
+                        JOIN HABITACAO H ON C.NOME = H.COMUNIDADE AND C.ESPECIE = H.ESPECIE
+                        JOIN PLANETA P ON H.PLANETA = P.ID_ASTRO
+                        JOIN DOMINANCIA D ON P.ID_ASTRO = D.PLANETA
+                        JOIN NACAO N ON D.NACAO = N.NOME
+                        JOIN NACAO_FACCAO NF ON N.NOME = NF.NACAO
+                        JOIN FACCAO F ON NF.FACCAO = F.NOME
+                        JOIN LIDER L ON F.LIDER = L.CPI
+                        LEFT JOIN ORBITA_PLANETA OP ON P.ID_ASTRO = OP.PLANETA
+                        LEFT JOIN ESTRELA E ON OP.ESTRELA = E.ID_ESTRELA
+                        LEFT JOIN SISTEMA S ON E.ID_ESTRELA = S.NOME
+                        WHERE L.CPI = p_oficial
+                    UNION
+                    SELECT P.ID_ASTRO AS PLANETA, C.ESPECIE, F.NOME AS FACCAO, S.NOME AS SISTEMA, -C.QTD_HABITANTES, H.DATA_INI AS DATA
+                        FROM COMUNIDADE C
+                        JOIN HABITACAO H ON C.NOME = H.COMUNIDADE AND C.ESPECIE = H.ESPECIE
+                        JOIN PLANETA P ON H.PLANETA = P.ID_ASTRO
+                        JOIN DOMINANCIA D ON P.ID_ASTRO = D.PLANETA
+                        JOIN NACAO N ON D.NACAO = N.NOME
+                        JOIN NACAO_FACCAO NF ON N.NOME = NF.NACAO
+                        JOIN FACCAO F ON NF.FACCAO = F.NOME
+                        JOIN LIDER L ON F.LIDER = L.CPI
+                        LEFT JOIN ORBITA_PLANETA OP ON P.ID_ASTRO = OP.PLANETA
+                        LEFT JOIN ESTRELA E ON OP.ESTRELA = E.ID_ESTRELA
+                        LEFT JOIN SISTEMA S ON E.ID_ESTRELA = S.NOME
+                        WHERE L.CPI = p_oficial)
+                WHERE DATA IS NOT NULL
+                ORDER BY DATA;
             RETURN c_return;
 
         EXCEPTION
             WHEN OTHERS THEN
-                RAISE_APPLICATION_ERROR(-20001, 'Erro ao buscar habitantes por planeta');
-    END habitantes_por_planeta;
+                RAISE_APPLICATION_ERROR(-20001, 'Erro ao buscar habitantes');
+    END evolucao_habitantes;
 END;
 
-SELECT *, SUM(QTD_HABITANTES) OVER (ORDER BY DATA ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS HAB_ATUAL FROM (
-    SELECT H.PLANETA, P.ID_ASTRO, C.QTD_HABITANTES, H.DATA_INI AS DATA
+
+SELECT DATA, SUM(QTD_HABITANTES) OVER (ORDER BY DATA ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS HAB_ATUAL FROM (
+    SELECT C.QTD_HABITANTES, H.DATA_INI AS DATA
         FROM COMUNIDADE C
         JOIN HABITACAO H ON C.NOME = H.COMUNIDADE AND C.ESPECIE = H.ESPECIE
         JOIN PLANETA P ON H.PLANETA = P.ID_ASTRO
@@ -49,7 +60,7 @@ SELECT *, SUM(QTD_HABITANTES) OVER (ORDER BY DATA ROWS BETWEEN UNBOUNDED PRECEDI
         JOIN LIDER L ON F.LIDER = L.CPI
         WHERE L.CPI = '111.111.111-15'
     UNION
-    SELECT H.PLANETA, P.ID_ASTRO, -C.QTD_HABITANTES, H.DATA_FIM AS DATA
+    SELECT -C.QTD_HABITANTES, H.DATA_FIM AS DATA
         FROM COMUNIDADE C
         JOIN HABITACAO H ON C.NOME = H.COMUNIDADE AND C.ESPECIE = H.ESPECIE
         JOIN PLANETA P ON H.PLANETA = P.ID_ASTRO
@@ -61,7 +72,6 @@ SELECT *, SUM(QTD_HABITANTES) OVER (ORDER BY DATA ROWS BETWEEN UNBOUNDED PRECEDI
         WHERE L.CPI = '111.111.111-15')
 WHERE DATA IS NOT NULL
 ORDER BY DATA;
-
 select * from HABITACAO;
 
 SELECT *
