@@ -1,14 +1,17 @@
 from flask import Flask, request, jsonify, session, redirect
 from flask_cors import CORS
 import oracledb
+import json
 
 app = Flask(__name__)
 CORS(app)  # Habilita CORS para todos os endpoints
 app.secret_key = 'your_secret_key'  # Chave secreta para gerenciar sessões, altere para uma chave segura
 
 # Informações de conexão
-un = 'a11796472'
-pw = 'a11796472'
+cred = json.load(open('credentials_oracle.json'))
+
+un = cred['username']
+pw = cred['password']
 host = 'orclgrad1.icmc.usp.br'
 port = 1521
 service_name = 'pdb_elaine.icmc.usp.br'

@@ -8,4 +8,6 @@ node_modules/
 # Ignorar arquivos de build
 /build/
 
+backend/credentials_oracle.json
+
 # Outros arquivos ou diretórios a serem ignorados

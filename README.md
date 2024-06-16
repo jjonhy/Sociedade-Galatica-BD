@@ -1,5 +1,14 @@
 # Sociedade-Galatica-BD
 
+Crie um arquivo dentro do diretório backend chamado credentials_oracle.json no seguinte formato:
+
+```json
+{
+    "username": "a11111111",
+    "password": "password"
+}
+```
+
 Ir ate o diretorio login-page
 
 ### `npm install`
