@@ -7,8 +7,8 @@ CORS(app)  # Habilita CORS para todos os endpoints
 app.secret_key = 'your_secret_key'  # Chave secreta para gerenciar sessões, altere para uma chave segura
 
 # Informações de conexão
-un = 'a12677492'
-pw = 'a12677492'
+un = 'a11796472'
+pw = 'a11796472'
 host = 'orclgrad1.icmc.usp.br'
 port = 1521
 service_name = 'pdb_elaine.icmc.usp.br'
@@ -204,7 +204,7 @@ def inserir_dominancia():
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
 
-@app.route('/api/relatorio/<tipo>', methods=['GET'])
+@app.route('/api/relatorio/cientista/<tipo>', methods=['GET'])
 def obter_relatorio(tipo):
     try:
         if tipo == 'estrela':
@@ -278,23 +278,47 @@ def consulta_relatorio_sistemas():
     except Exception as e:
         raise e
     
-@app.route('/api/relatorio/oficial', methods=['GET'])
-def consulta_relatorio_oficial():
+@app.route('/api/relatorio/oficial', defaults={'agrupamento': None}, methods=['POST'])
+@app.route('/api/relatorio/oficial/<agrupamento>', methods=['POST'])
+def consulta_relatorio_oficial(agrupamento = None):
     try:
-        relatorio = consulta_evolucao_habitantes_oficial()
+        data = request.json
+        cpi = data.get('username')
+        if agrupamento in ['planeta', 'especie', 'faccao', 'sistema']:
+            relatorio = executa_funcao('Oficial', 'evolucao_habitantes_por_{agrupamento}', [cpi])
+        else:
+            relatorio = executa_funcao('Oficial', 'evolucao_habitantes', [cpi])
+        return jsonify(relatorio), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+    
+def executa_funcao(pacote: str, funcao: str, parametros: list):
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                refcursor = cursor.callfunc(f'Pacote{pacote}.{funcao}', oracledb.CURSOR, parametros)
+                result = refcursor.fetchall()
+                return {"tipo": pacote, "dados": result}
+    except Exception as e:
+        raise e
+
+@app.route('/api/comunidades_faccao', methods=['GET'])
+def consulta_relatorio_lider():
+    try:
+        relatorio = consulta_comunidades_faccao()
         return jsonify(relatorio), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
 
-def consulta_evolucao_habitantes_oficial():
+def consulta_comunidades_faccao():
     try:
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
-                # Chamar a função do package PacoteOficial para obter informações de evolução de habitantes
-                cursor.callproc('PacoteOficial.evolucao_habitantes', ['111.111.111-15'])  # Substitua pelo CPI do oficial correto
+                # Chamar a função do package PacoteLider para obter informações de evolução de habitantes
+                refcursor = cursor.callfunc('PacoteLider.comunidades_faccao', oracledb.CURSOR, session['username'])  # Substitua pelo CPI do oficial correto
+                result = refcursor.fetchall()
                 # Exemplo básico de como obter os resultados
-                result = cursor.fetchall()
-                return {"tipo": "oficial", "dados": result}
+                return {"tipo": "lider", "dados": result}
     except Exception as e:
         raise e
 

@@ -2,6 +2,8 @@
 
 CREATE OR REPLACE PACKAGE PacoteComandante AS
 
+    -- vARIAVEIS
+
     TYPE t_informacoes_1 IS RECORD (
         PLANETAS PLANETA.ID_ASTRO%TYPE,
         QUANTIDADE_COMUNIDADES NUMBER,
@@ -26,11 +28,15 @@ CREATE OR REPLACE PACKAGE PacoteComandante AS
     e_naoPermitido EXCEPTION;
     e_naoEncontrado EXCEPTION;
 
+    -- Gerenciamento
     PROCEDURE incluir_federacao_na_nacao(p_cpi LIDER.CPI%TYPE, p_nome_fd FEDERACAO.NOME%TYPE);
     PROCEDURE excluir_federacao_da_nacao(p_cpi LIDER.CPI%TYPE);
     PROCEDURE criar_federacao (p_cpi LIDER.CPI%TYPE, p_nome_fd FEDERACAO.NOME%TYPE, p_data_fund FEDERACAO.DATA_FUND%TYPE DEFAULT SYSDATE);
     PROCEDURE insere_dominancia(p_cpi LIDER.CPI%TYPE,p_planeta DOMINANCIA.PLANETA%TYPE,p_data_ini DOMINANCIA.DATA_INI%TYPE DEFAULT SYSDATE);
     
+    PROCEDURE consulta_informacoes_estrategicas(p_informacoes_est1 OUT T_INFORMACOES_1_TYPE,p_informacoes_est2 OUT T_INFORMACOES_2_TYPE);
+
+    FUNCTION planetas_em_potencial RETURN SYS_REFCURSOR;
 
 END PacoteComandante;
 /
@@ -320,22 +326,26 @@ CREATE OR REPLACE PACKAGE BODY PacoteComandante AS
         distancia Euclideana.
     */
     
-    FUNCTION planetas_em_potencial(p_lider lider.cpi%TYPE) RETURN SYS_REFCURSOR IS
+        
+    FUNCTION planetas_em_potencial RETURN SYS_REFCURSOR IS
         c_return SYS_REFCURSOR;
         BEGIN
             OPEN c_return FOR
-                SELECT C.ESPECIE, COUNT(DISTINCT C.NOME || C.ESPECIE), SUM(C.QTD_HABITANTES)
-                FROM COMUNIDADE C
-                JOIN PARTICIPA P ON P.COMUNIDADE = C.NOME AND P.ESPECIE = C.ESPECIE
-                JOIN FACCAO F ON F.NOME = P.FACCAO
-                left join HABITACAO H on C.ESPECIE = H.ESPECIE and C.NOME = H.COMUNIDADE
-                LEFT JOIN PLANETA P2 on H.PLANETA = P2.ID_ASTRO
-                LEFT JOIN DOMINANCIA D on P2.ID_ASTRO = D.PLANETA
-                LEFT JOIN ORBITA_PLANETA OP on P2.ID_ASTRO = OP.PLANETA
-                LEFT JOIN ESTRELA E on OP.ESTRELA = E.ID_ESTRELA
-                LEFT JOIN SISTEMA S on E.ID_ESTRELA = S.ESTRELA
-                WHERE H.DATA_FIM IS NULL AND F.LIDER = p_lider
-                GROUP BY C.ESPECIE;
+                SELECT DISTINCT PLANETA.ID_ASTRO, PLANETA.MASSA, PLANETA.RAIO, PLANETA.CLASSIFICACAO, SISTEMA.NOME
+                    FROM SISTEMA
+                    JOIN ORBITA_PLANETA 
+                        ON SISTEMA.ESTRELA = ORBITA_PLANETA.ESTRELA
+                        JOIN PLANETA
+                            ON ORBITA_PLANETA.PLANETA = PLANETA.ID_ASTRO
+                            LEFT JOIN DOMINANCIA
+                                ON PLANETA.ID_ASTRO = DOMINANCIA.PLANETA
+                    
+                                WHERE PLANETA.ID_ASTRO NOT IN
+                                    (
+                                        SELECT DOMINANCIA.PLANETA
+                                            from DOMINANCIA
+                                            WHERE DOMINANCIA.DATA_FIM IS NULL
+                                    );
             RETURN c_return;
     END planetas_em_potencial;
         

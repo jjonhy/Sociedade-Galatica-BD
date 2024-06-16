@@ -32,8 +32,11 @@ export const Oficial = () => {
 
   const exibirRelatorioOficial = async () => {
     try {
-      const response = await axios.get('/api/relatorio/oficial');
+      const username = localStorage.getItem('username')
+      const response = await axios.post('http://localhost:5000/api/relatorio/oficial', { username });
       setRelatorio(response.data.dados); // Atualiza o estado com os dados do relatório
+      console.log(response.data.dados);
+      console.log(relatorio);
     } catch (error) {
       console.error('Erro ao obter relatório oficial:', error);
     }
@@ -66,13 +69,13 @@ export const Oficial = () => {
             </thead>
             <tbody>
               {relatorio.map(item => (
-                <tr key={item.DATA}>
-                  <td>{item.PLANETA}</td>
-                  <td>{item.ESPECIE}</td>
-                  <td>{item.FACCAO}</td>
-                  <td>{item.SISTEMA}</td>
-                  <td>{item.DATA}</td>
-                  <td>{item.HAB_ATUAL}</td>
+                <tr key={item[0] + item[1] + item[4]}>
+                  <td>{item[0]}</td>
+                  <td>{item[1]}</td>
+                  <td>{item[2]}</td>
+                  <td>{item[3]}</td>
+                  <td>{item[4]}</td>
+                  <td>{item[5]}</td>
                 </tr>
               ))}
             </tbody>
