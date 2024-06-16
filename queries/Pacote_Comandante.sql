@@ -79,6 +79,8 @@ CREATE OR REPLACE PACKAGE BODY PacoteComandante AS
         UPDATE NACAO SET NACAO.FEDERACAO=p_nome_fd
             WHERE nome=v_nacao;
     
+        commit;
+    
         EXCEPTION
             WHEN federacao_existente
                 THEN RAISE_APPLICATION_ERROR(-20101, 'Nacao ja possui uma federacao associada. Exclua primeira a federacao atual.');
@@ -114,6 +116,8 @@ CREATE OR REPLACE PACKAGE BODY PacoteComandante AS
     
         UPDATE NACAO SET NACAO.FEDERACAO=NULL
             WHERE nome=v_nacao;
+    
+        commit;
     
         EXCEPTION
             WHEN federacao_inexistente
@@ -153,10 +157,12 @@ CREATE OR REPLACE PACKAGE BODY PacoteComandante AS
             RAISE federacao_existente;
         END IF;
     
-        INSERT INTO FEDERACAO VALUES(p_nome_fd, p_data_fund);
+        INSERT INTO FEDERACAO VALUES(p_nome_fd, TO_DATE(p_data_fund, 'yyyy-mm-dd'));
     
         UPDATE NACAO SET NACAO.FEDERACAO=p_nome_fd
             WHERE nome=v_nacao;
+            
+        commit;
     
         EXCEPTION
             WHEN federacao_existente
@@ -201,7 +207,9 @@ CREATE OR REPLACE PACKAGE BODY PacoteComandante AS
             RAISE planeta_ja_dominado;
         END IF;
         
-        INSERT INTO DOMINANCIA VALUES(p_planeta,v_nacao,p_data_ini,NULL);
+        INSERT INTO DOMINANCIA VALUES(p_planeta,v_nacao,TO_DATE(p_data_ini, 'yyyy-mm-dd'),NULL);
+        
+        commit;
         
         EXCEPTION
             WHEN NO_DATA_FOUND
@@ -354,8 +362,6 @@ CREATE OR REPLACE PACKAGE BODY PacoteComandante AS
 
 
 
-    
-    
     
     
     

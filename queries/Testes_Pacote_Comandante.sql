@@ -61,7 +61,7 @@ select * from federacao where federacao.nome = 'piramide';
 -- ainda existe
 
 BEGIN
-PacoteComandante.criar_federacao ('123.456.789-10','ponte',TO_DATE('2000-01-01', 'yyyy-mm-dd'));
+PacoteComandante.criar_federacao ('123.456.789-10','ponte','01/01/2001');
 END;
 -- ok
 

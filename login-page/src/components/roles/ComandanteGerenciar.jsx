@@ -34,7 +34,7 @@ const GerenciarEstrelas = () => {
       await axios.post("http://localhost:5000/excluir_federacao", {
         cpi: localStorage.getItem('username'),
       });
-      alert("Federação incluída!");
+      alert("Federação excluída!");
     } catch (error) {
       if (error.response) {
         alert(error.response.data.message);
@@ -46,24 +46,46 @@ const GerenciarEstrelas = () => {
     }
   };
 
-  const criarFederacao = async () => {
-    const response = await fetch('http://localhost:5000/criar_federacao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi, nome_fd: nomeFd, data_fund: dataFund })
-    });
-    const data = await response.json();
-    alert(data.message);
+  const criarFederacao = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:5000/criar_federacao", {
+        cpi: localStorage.getItem('username'),
+        nome_fd: nomeFd,
+        data_fund: dataFund
+      });
+      alert("Federação criada e incluída!");
+      setNomeFd("");
+      setDataFund("");
+    } catch (error) {
+      if (error.response) {
+        alert(error.response.data.message);
+      } else if (error.request) {
+        alert("Erro na conexão com o servidor. Por favor, tente novamente mais tarde.");
+      } else {
+        alert("Ocorreu um erro inesperado.");
+      }
+    }
   };
 
-  const inserirDominancia = async () => {
-    const response = await fetch('http://localhost:5000/inserir_dominancia', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi, planeta, data_ini: dataIni })
-    });
-    const data = await response.json();
-    alert(data.message);
+  const inserirDominancia = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:5000/inserir_dominancia", {
+        cpi: localStorage.getItem('username'),
+        planeta: planeta,
+        data_ini: dataIni
+      });
+      alert("Dominancia inserida!");
+    } catch (error) {
+      if (error.response) {
+        alert(error.response.data.message);
+      } else if (error.request) {
+        alert("Erro na conexão com o servidor. Por favor, tente novamente mais tarde.");
+      } else {
+        alert("Ocorreu um erro inesperado.");
+      }
+    }
   };
 
   return (

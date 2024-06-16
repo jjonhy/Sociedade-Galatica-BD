@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, session, redirect
 from flask_cors import CORS
 import oracledb
 import json
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)  # Habilita CORS para todos os endpoints
@@ -17,6 +18,9 @@ port = 1521
 service_name = 'pdb_elaine.icmc.usp.br'
 
 dsn = f"(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={host})(PORT={port}))(CONNECT_DATA=(SERVICE_NAME={service_name})))"
+
+def to_dd_mm_yyyy(dt):
+    return f"{dt.day}/{dt.month}/{dt.year}"
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -183,6 +187,8 @@ def criar_federacao():
     cpi = data.get('cpi')
     nome_fd = data.get('nome_fd')
     data_fund = data.get('data_fund', 'SYSDATE')
+
+    data_fund = datetime.strptime(data_fund,"%Y-%m-%d")
     
     try:
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
@@ -198,6 +204,8 @@ def inserir_dominancia():
     cpi = data.get('cpi')
     planeta = data.get('planeta')
     data_ini = data.get('data_ini', 'SYSDATE')
+
+    data_ini = datetime.strptime(data_ini,"%Y-%m-%d")
     
     try:
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
