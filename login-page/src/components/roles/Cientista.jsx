@@ -39,7 +39,7 @@ export const Cientista = ({ usuario }) => {
       <div>
         <h2>Overview</h2>
         <ul>
-          <li><Link to="/cientista/gerenciar-estrelas">Gerenciar Estrelas</Link></li>
+          <li><Link to="/cientista/gerenciar">Gerenciar Estrelas</Link></li>
           <li><Link to="/cientista/relatorios">Relatórios</Link></li>
         </ul>
       </div>

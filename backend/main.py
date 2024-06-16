@@ -90,5 +90,115 @@ def username():
         return jsonify({"message": f"An error occurred: {e}"}), 500
 
     
+@app.route('/incluir_federacao', methods=['POST'])
+def incluir_federacao():
+    data = request.json
+    cpi = data.get('cpi')
+    nome_fd = data.get('nome_fd')
+    
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                cursor.callproc('PacoteComandante.incluir_federacao_na_nacao', [cpi, nome_fd])
+        return jsonify({"message": "Federação incluída com sucesso"}), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+
+@app.route('/excluir_federacao', methods=['POST'])
+def excluir_federacao():
+    data = request.json
+    cpi = data.get('cpi')
+    
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                cursor.callproc('PacoteComandante.excluir_federacao_da_nacao', [cpi])
+        return jsonify({"message": "Federação excluída com sucesso"}), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+
+
+@app.route('/criar_federacao', methods=['POST'])
+def criar_federacao():
+    data = request.json
+    cpi = data.get('cpi')
+    nome_fd = data.get('nome_fd')
+    data_fund = data.get('data_fund', 'SYSDATE')
+    
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                cursor.callproc('PacoteComandante.criar_federacao', [cpi, nome_fd, data_fund])
+        return jsonify({"message": "Federação criada com sucesso"}), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+
+@app.route('/inserir_dominancia', methods=['POST'])
+def inserir_dominancia():
+    data = request.json
+    cpi = data.get('cpi')
+    planeta = data.get('planeta')
+    data_ini = data.get('data_ini', 'SYSDATE')
+    
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                cursor.callproc('PacoteComandante.insere_dominancia', [cpi, planeta, data_ini])
+        return jsonify({"message": "Dominância inserida com sucesso"}), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+
+@app.route('/api/relatorio/<tipo>', methods=['GET'])
+def obter_relatorio(tipo):
+    try:
+        if tipo == 'estrela':
+            relatorio = consulta_relatorio_estrelas()
+        elif tipo == 'planeta':
+            relatorio = consulta_relatorio_planetas()
+        elif tipo == 'sistema':
+            relatorio = consulta_relatorio_sistemas()
+        else:
+            return jsonify({"message": f"Tipo de relatório não suportado: {tipo}"}), 400
+        
+        return jsonify(relatorio), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+
+def consulta_relatorio_estrelas():
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                # Chamar a função do package PacoteComandante para obter informações de estrelas
+                cursor.callproc('PacoteComandante.consulta_informacoes_estrategicas', [None, None])
+                # Exemplo básico de como obter os resultados
+                result = cursor.fetchall()
+                return {"tipo": "estrela", "dados": result}
+    except Exception as e:
+        raise e
+
+def consulta_relatorio_planetas():
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                # Chamar a função do package PacoteComandante para obter informações de planetas
+                cursor.callproc('PacoteComandante.consulta_informacoes_estrategicas', [None, None])
+                # Exemplo básico de como obter os resultados
+                result = cursor.fetchall()
+                return {"tipo": "planeta", "dados": result}
+    except Exception as e:
+        raise e
+
+def consulta_relatorio_sistemas():
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                # Chamar a função do package PacoteComandante para obter informações de sistemas
+                cursor.callproc('PacoteComandante.consulta_informacoes_estrategicas', [None, None])
+                # Exemplo básico de como obter os resultados
+                result = cursor.fetchall()
+                return {"tipo": "sistema", "dados": result}
+    except Exception as e:
+        raise e
+    
 if __name__ == '__main__':
     app.run(debug=True)
