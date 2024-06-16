@@ -1,13 +1,18 @@
 CREATE OR REPLACE PACKAGE PacoteOficial AS
     -- Retorna a quantidade de habitantes em cada momento que o a quantidade muda (habitacao comeca ou acaba)
+    -- Retorno: PLANETA, ESPECIE, FACCAO, SISTEMA, DATA, HAB_ATUAL
     FUNCTION evolucao_habitantes(p_oficial lider.cpi%TYPE) RETURN SYS_REFCURSOR;
     -- Retorna a quantidade de habitantes em cada planeta em cada momento que o a quantidade muda (habitacao comeca ou acaba)
+    -- Retorno: PLANETA, ESPECIE, FACCAO, SISTEMA, DATA, HAB_ATUAL
     FUNCTION evolucao_habitantes_por_planeta(p_oficial lider.cpi%TYPE) RETURN SYS_REFCURSOR;
     -- Retorna a quantidade de habitantes de cada especie em cada momento que o a quantidade muda (habitacao comeca ou acaba)
+    -- Retorno: PLANETA, ESPECIE, FACCAO, SISTEMA, DATA, HAB_ATUAL
     FUNCTION evolucao_habitantes_por_especie(p_oficial lider.cpi%TYPE) RETURN SYS_REFCURSOR;
     -- Retorna a quantidade de habitantes em cada faccao em cada momento que o a quantidade muda (habitacao comeca ou acaba)
+    -- Retorno: PLANETA, ESPECIE, FACCAO, SISTEMA, DATA, HAB_ATUAL
     FUNCTION evolucao_habitantes_por_faccao(p_oficial lider.cpi%TYPE) RETURN SYS_REFCURSOR;
     -- Retorna a quantidade de habitantes em cada sistema em cada momento que o a quantidade muda (habitacao comeca ou acaba)
+    -- Retorno: PLANETA, ESPECIE, FACCAO, SISTEMA, DATA, HAB_ATUAL
     FUNCTION evolucao_habitantes_por_sistema(p_oficial lider.cpi%TYPE) RETURN SYS_REFCURSOR;
 END;
 /

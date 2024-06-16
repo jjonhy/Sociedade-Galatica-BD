@@ -11,7 +11,7 @@ const Relatorios = () => {
 
   const fetchComunidadesFaccao = async () => {
     try {
-      const response = await axios.get("/api/comunidades_faccao");
+      const response = await axios.get("http://localhost:5000/api/comunidades_faccao");
       setComunidades(response.data);
     } catch (error) {
       console.error("Erro ao buscar comunidades da facção:", error);
