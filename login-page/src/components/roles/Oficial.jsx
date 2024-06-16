@@ -35,8 +35,6 @@ export const Oficial = () => {
       const username = localStorage.getItem('username')
       const response = await axios.post('http://localhost:5000/api/relatorio/oficial', { username });
       setRelatorio(response.data.dados); // Atualiza o estado com os dados do relatório
-      console.log(response.data.dados);
-      console.log(relatorio);
     } catch (error) {
       console.error('Erro ao obter relatório oficial:', error);
     }
