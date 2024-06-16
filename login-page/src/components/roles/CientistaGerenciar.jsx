@@ -55,7 +55,7 @@ const CientistaGerenciar = () => {
   const handleSubmitReadEstrela = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/buscar_estrela', { params: { id_estrela: idEstrela } });
+      const response = await axios.post('http://localhost:5000/buscar_estrela', { id_estrela: idEstrela });
       setEstrelaInfo(response.data.data); // Alteração para pegar diretamente a estrela encontrada
       alert("Estrela encontrada com sucesso!");
     } catch (error) {
