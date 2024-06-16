@@ -295,6 +295,7 @@ def consulta_comunidades_faccao():
 @app.route('/criar_estrela', methods=['POST'])
 def criar_estrela():
     data = request.json
+    user_id = data.get('userId')
     id = data.get('id')
     x = data.get('x')
     y = data.get('y')
@@ -307,6 +308,7 @@ def criar_estrela():
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 cursor.callproc('PacoteCientista.cria_estrela', [id, x, y, z, nome, classificacao, massa])
+        log_operation(user_id, f"Estrela criada com ID {data['id']}")
         return jsonify({"message": "Estrela criada com sucesso"}), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
@@ -376,6 +378,18 @@ def relatorios(tipo):
         return str(e), 400
     finally:
         cursor.close()
+
+import oracledb
+
+def log_operation(user_id, message):
+    with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO LOG_TABLE (userId, message) VALUES (:1, :2)",
+                [user_id, message]
+            )
+        connection.commit()
+
 
 if __name__ == '__main__':
     app.run(debug=True)

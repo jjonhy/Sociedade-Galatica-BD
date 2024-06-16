@@ -6,6 +6,7 @@ const CientistaGerenciar = () => {
   const [idEstrela, setIdEstrela] = useState('');
   const [idEstrelaApagar, setEstrelaApagar] = useState('');
   const [formData, setFormData] = useState({
+    userId: localStorage.getItem('username'),
     id: '',
     x: '',
     y: '',
