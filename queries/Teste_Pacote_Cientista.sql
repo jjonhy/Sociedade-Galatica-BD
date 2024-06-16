@@ -19,11 +19,26 @@ end;
 
 -- teste read
 
-SELECT * FROM ESTRELA WHERE ID_ESTRELA = '2345690230933332';
+SELECT * FROM ESTRELA WHERE ID_ESTRELA = 'GJ 9798';
 
 DECLARE
+    l_cursor SYS_REFCURSOR;
+    v_id_estrela ESTRELA.id_estrela%TYPE;
+    v_nome ESTRELA.nome%TYPE;
+    v_classificacao ESTRELA.classificacao%TYPE;
+    v_massa ESTRELA.massa%TYPE;
+    v_x ESTRELA.x%TYPE;
+    v_y ESTRELA.y%TYPE;
+    v_z ESTRELA.z%TYPE;
 BEGIN
-    DBMS_OUTPUT.put_line(PacoteCientista.busca_estrela('23456902309332').NOME);
+    l_cursor := PacoteCientista.busca_estrela('GJ 9798');
+
+    LOOP FETCH l_cursor INTO v_id_estrela, v_nome, v_classificacao, v_massa, v_x, v_y, v_z;
+        EXIT WHEN l_cursor%NOTFOUND;
+
+        DBMS_OUTPUT.PUT_LINE(v_id_estrela || ' ' || v_nome || ' ' || v_classificacao || ' ' || v_massa || ' ' || v_x || ' ' || v_y || ' ' || v_z);
+    END LOOP;
+    close l_cursor;
 EXCEPTION
     WHEN OTHERS THEN
         DBMS_OUTPUT.put_line('Erro: ' || SQLERRM);

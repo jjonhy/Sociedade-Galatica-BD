@@ -29,11 +29,14 @@ export const Oficial = () => {
 
 
   const [relatorio, setRelatorio] = useState([]);
+  const [agrupamento, setAgrupamento] = useState(null);
 
-  const exibirRelatorioOficial = async () => {
+  const exibirRelatorioOficial = async (agrupar = null) => {
     try {
+      setAgrupamento(agrupar);
       const username = localStorage.getItem('username')
-      const response = await axios.post('http://localhost:5000/api/relatorio/oficial', { username });
+      let endpoint = agrupar != null ? `http://localhost:5000/api/relatorio/oficial/${agrupar}` : "http://localhost:5000/api/relatorio/oficial";
+      const response = await axios.post(endpoint, { username });
       setRelatorio(response.data.dados); // Atualiza o estado com os dados do relatório
     } catch (error) {
       console.error('Erro ao obter relatório oficial:', error);
@@ -50,7 +53,11 @@ export const Oficial = () => {
       )}
       <div>
     </div>
-      <button onClick={exibirRelatorioOficial}>Exibir Relatório Oficial</button>
+      <button onClick={() => exibirRelatorioOficial()}>Relatório simples</button>
+      <button onClick={() => exibirRelatorioOficial('planeta')}>Relatório agrupado por planeta</button>
+      <button onClick={() => exibirRelatorioOficial('especie')}>Relatório agrupado por especie</button>
+      <button onClick={() => exibirRelatorioOficial('faccao')}>Relatório agrupado por faccao</button>
+      <button onClick={() => exibirRelatorioOficial('sistema')}>Relatório agrupado por sistema</button>
       {relatorio.length > 0 && (
         <div>
           <h2>Relatório de Evolução de Habitantes</h2>
