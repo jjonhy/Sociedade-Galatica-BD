@@ -48,6 +48,7 @@ CREATE OR REPLACE PACKAGE BODY PacoteCientista AS
             end if;
 
             INSERT INTO estrela values (p_id_estrela, p_nome, p_classificacao, p_massa, p_x, p_y, p_z);
+            COMMIT;
         EXCEPTION
             WHEN e_idDuplicado THEN
                 RAISE_APPLICATION_ERROR(-20003, 'Id duplicado');
