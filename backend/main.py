@@ -121,6 +121,7 @@ def alterar_nome_faccao():
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 cursor.callproc('PacoteLider.alterar_nome_faccao', [cpi, novoNome])
+        log_operation(cpi, f"Nome da facção alterado para {novoNome}")
         return jsonify({"message": "Nome alterado com sucesso"}), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
@@ -135,6 +136,7 @@ def indicar_novo_lider_faccao():
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 cursor.callproc('PacoteLider.indicar_novo_lider_faccao', [cpi, novoLider])
+        log_operation(cpi, f"Novo líder indicado: {novoLider}")
         return jsonify({"message": "Nome alterado com sucesso"}), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
@@ -150,6 +152,7 @@ def remover_faccao_de_nacao():
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 cursor.callproc('PacoteLider.remove_faccao_da_nacao', [cpi, nacao, faccao])
+        log_operation(cpi, f"Facção {faccao} removida da nação {nacao}")
         return jsonify({"message": "Nome alterado com sucesso"}), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
@@ -163,6 +166,7 @@ def credenciar_comunidades():
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 cursor.callproc('PacoteLider.credenciar_comunidades', [cpi])
+        log_operation(cpi, "Comunidades credenciadas")        
         return jsonify({"message": "Credenciamento realizado com sucesso"}), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
@@ -237,11 +241,11 @@ def consulta_informacoes_estrategicas():
     except Exception as e:
         raise e
     
-@app.route('/api/relatorio/cientista/<tipo>', methods=['POST'])
-def consulta_relatorio_cientista(tipo):
+@app.route('/api/relatorio/cientista/<tipo>/<limite>', methods=['POST'])
+def consulta_relatorio_cientista(tipo, limite):
     try:
         if tipo in ['planeta', 'estrela', 'sistema']:
-            relatorio = executa_funcao('Cientista', 'relatorio_{tipo}', [1000])
+            relatorio = executa_funcao('Cientista', f'relatorio_{tipo}', [limite])
         else:
             return jsonify({"message": f"Tipo de relatório não suportado: {tipo}"}), 400
         
@@ -303,6 +307,7 @@ def consulta_comunidades_faccao():
 @app.route('/criar_estrela', methods=['POST'])
 def criar_estrela():
     data = request.json
+    user_id = data.get('userId')
     id = data.get('id')
     x = data.get('x')
     y = data.get('y')
@@ -315,24 +320,27 @@ def criar_estrela():
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 cursor.callproc('PacoteCientista.cria_estrela', [id, x, y, z, nome, classificacao, massa])
+        log_operation(user_id, f"Estrela criada com ID {data['id']}")
         return jsonify({"message": "Estrela criada com sucesso"}), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
     
-@app.route('/buscar_estrela', methods=['GET'])
+@app.route('/buscar_estrela', methods=['POST'])
 def buscar_estrela():
-    id_estrela = request.args.get('id_estrela')
+    data = request.json
+    user_id = data.get('userId')
+    id_estrela = data.get('id_estrela')
     try:
-        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
-            with connection.cursor() as cursor:
-                result = cursor.callfunc('busca_estrela', cx_Oracle.OBJECT, [id_estrela])
-                return jsonify({"message": "Estrela encontrada com sucesso", "data": result}), 200
-    except Exception as e:
-        return jsonify({"message": f"An error occurred: {e}"}), 500
+        resultado = executa_funcao('Cientista', 'busca_estrela', [id_estrela])
+        log_operation(user_id, f"Buscou estrela com ID {id_estrela}")        
+        return jsonify(resultado), 200
+    except cx_Oracle.Error as error:
+        return jsonify({"message": f"An error occurred: {error}"}), 500
 
 @app.route('/editar_estrela', methods=['PUT'])
 def editar_estrela():
     data = request.json
+    user_id = data.get('userId')
     id_estrela = data.get('id')
     novo_id_estrela = data.get('idNovo')
     x = data.get('x')
@@ -347,18 +355,21 @@ def editar_estrela():
             with connection.cursor() as cursor:
                 cursor.callproc('PacoteCientista.edita_estrela', [id_estrela, novo_id_estrela, x, y, z, nome, classificacao, massa])
                 connection.commit()
+                log_operation(user_id, f"Editou estrela {id_estrela} para novo ID {novo_id_estrela}")        
                 return jsonify({"message": "Estrela editada com sucesso"}), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
-
+    
 @app.route('/deletar_estrela/<id_estrela>', methods=['DELETE'])
 def deletar_estrela(id_estrela):
+    user_id = request.args.get('user_id') 
     try:
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 cursor.callproc('PacoteCientista.deleta_estrela', [id_estrela])
                 connection.commit()
-                return jsonify({"message": "Estrela deletada com sucesso"}), 200
+        log_operation(user_id, f"Deletou estrela com ID {id_estrela}")
+        return jsonify({"message": "Estrela deletada com sucesso"}), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
 
@@ -385,6 +396,18 @@ def relatorios(tipo):
         return str(e), 400
     finally:
         cursor.close()
+
+import oracledb
+
+def log_operation(user_id, message):
+    with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO LOG_TABLE (userId, message) VALUES (:1, :2)",
+                [user_id, message]
+            )
+        connection.commit()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
