@@ -279,15 +279,7 @@ def executa_funcao(pacote: str, funcao: str, parametros: list):
                 return {"tipo": pacote, "dados": result}
     except Exception as e:
         raise e
-
-@app.route('/api/comunidades_faccao', methods=['GET'])
-def consulta_relatorio_lider():
-    try:
-        relatorio = consulta_comunidades_faccao()
-        return jsonify(relatorio), 200
-    except Exception as e:
-        return jsonify({"message": f"An error occurred: {e}"}), 500
-
+    
 def consulta_comunidades_faccao():
     try:
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
