@@ -36,6 +36,7 @@ def login():
                 result = cursor.fetchone()
                 if result:
                     session['username'] = username  # Armazena o username na sessão
+                    log_operation(username, f"{username} logou")        
                     return jsonify({"message": "Login successful", "username": username}), 200
                 else:
                     return jsonify({"message": "Invalid credentials"}), 401
