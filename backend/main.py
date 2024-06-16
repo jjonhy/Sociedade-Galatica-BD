@@ -96,21 +96,6 @@ def username():
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
 
-    
-@app.route('/incluir_federacao', methods=['POST'])
-def incluir_federacao():
-    data = request.json
-    cpi = data.get('cpi')
-    nome_fd = data.get('nome_fd')
-    
-    try:
-        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
-            with connection.cursor() as cursor:
-                cursor.callproc('PacoteComandante.incluir_federacao_na_nacao', [cpi, nome_fd])
-        return jsonify({"message": "Federação incluída com sucesso"}), 200
-    except Exception as e:
-        return jsonify({"message": f"An error occurred: {e}"}), 500
-
 @app.route('/api/alterar_nome_faccao', methods=['POST'])
 def alterar_nome_faccao():
     data = request.json
@@ -171,7 +156,22 @@ def credenciar_comunidades():
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
     
-
+   
+@app.route('/incluir_federacao', methods=['POST'])
+def incluir_federacao():
+    data = request.json
+    cpi = data.get('cpi')
+    nome_fd = data.get('nome_fd')
+    
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                cursor.callproc('PacoteComandante.incluir_federacao_na_nacao', [cpi, nome_fd])
+        log_operation(cpi, f"Incluiu federação {nome_fd} na nação com CPI {cpi}")        
+        return jsonify({"message": "Federação incluída com sucesso"}), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+    
 @app.route('/excluir_federacao', methods=['POST'])
 def excluir_federacao():
     data = request.json
@@ -181,6 +181,7 @@ def excluir_federacao():
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 cursor.callproc('PacoteComandante.excluir_federacao_da_nacao', [cpi])
+        log_operation(cpi, f"Excluiu federação da nação com CPI {cpi}")        
         return jsonify({"message": "Federação excluída com sucesso"}), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
@@ -198,6 +199,7 @@ def criar_federacao():
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 cursor.callproc('PacoteComandante.criar_federacao', [cpi, nome_fd, data_fund])
+        log_operation(cpi, f"Criou federação {nome_fd} na data {data_fund} com CPI {cpi}")        
         return jsonify({"message": "Federação criada com sucesso"}), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
@@ -215,6 +217,7 @@ def inserir_dominancia():
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 cursor.callproc('PacoteComandante.insere_dominancia', [cpi, planeta, data_ini])
+        log_operation(cpi, f"Inseriu dominância no planeta {planeta} na data {data_ini} com CPI {cpi}")        
         return jsonify({"message": "Dominância inserida com sucesso"}), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
