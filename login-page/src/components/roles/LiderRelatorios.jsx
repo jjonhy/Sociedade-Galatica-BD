@@ -1,91 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import { Container, Table } from "reactstrap";
+import axios from "axios"; // Importe o Axios ou outro cliente HTTP que você esteja usando
 
-const GerenciarEstrelas = () => {
-  const [cpi, setCpi] = useState('');
-  const [nomeFd, setNomeFd] = useState('');
-  const [planeta, setPlaneta] = useState('');
-  const [dataFund, setDataFund] = useState('');
-  const [dataIni, setDataIni] = useState('');
+const Relatorios = () => {
+  const [comunidades, setComunidades] = useState([]);
 
-  const incluirFederacao = async () => {
-    const response = await fetch('http://localhost:5000/incluir_federacao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi, nome_fd: nomeFd })
-    });
-    const data = await response.json();
-    alert(data.message);
-  };
+  useEffect(() => {
+    fetchComunidadesFaccao();
+  }, []);
 
-  const excluirFederacao = async () => {
-    const response = await fetch('http://localhost:5000/excluir_federacao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi })
-    });
-    const data = await response.json();
-    alert(data.message);
-  };
-
-  const criarFederacao = async () => {
-    const response = await fetch('http://localhost:5000/criar_federacao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi, nome_fd: nomeFd, data_fund: dataFund })
-    });
-    const data = await response.json();
-    alert(data.message);
-  };
-
-  const inserirDominancia = async () => {
-    const response = await fetch('http://localhost:5000/inserir_dominancia', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi, planeta, data_ini: dataIni })
-    });
-    const data = await response.json();
-    alert(data.message);
+  const fetchComunidadesFaccao = async () => {
+    try {
+      const response = await axios.get("/api/comunidades_faccao");
+      setComunidades(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar comunidades da facção:", error);
+    }
   };
 
   return (
-    <div>
-      <h2>Gerenciar Comandante</h2>
-      <div>
-        <label>
-          CPI:
-          <input type="text" value={cpi} onChange={(e) => setCpi(e.target.value)} />
-        </label>
-      </div>
-      <div>
-        <label>
-          Nome da Federação:
-          <input type="text" value={nomeFd} onChange={(e) => setNomeFd(e.target.value)} />
-        </label>
-      </div>
-      <div>
-        <label>
-          Data de Fundação:
-          <input type="date" value={dataFund} onChange={(e) => setDataFund(e.target.value)} />
-        </label>
-      </div>
-      <button onClick={incluirFederacao}>Incluir Federação</button>
-      <button onClick={excluirFederacao}>Excluir Federação</button>
-      <button onClick={criarFederacao}>Criar Federação</button>
-      <div>
-        <label>
-          Planeta:
-          <input type="text" value={planeta} onChange={(e) => setPlaneta(e.target.value)} />
-        </label>
-      </div>
-      <div>
-        <label>
-          Data de Início da Dominância:
-          <input type="date" value={dataIni} onChange={(e) => setDataIni(e.target.value)} />
-        </label>
-      </div>
-      <button onClick={inserirDominancia}>Inserir Dominância</button>
-    </div>
+    <Container className="relatorios">
+      <h2>Relatórios</h2>
+      <Table striped>
+        <thead>
+          <tr>
+            <th>Comunidade</th>
+            <th>Espécie</th>
+            <th>Quantidade de Habitantes</th>
+            <th>Planeta</th>
+            <th>Nação</th>
+            <th>Sistema</th>
+          </tr>
+        </thead>
+        <tbody>
+          {comunidades.map((comunidade, index) => (
+            <tr key={index}>
+              <td>{comunidade.COMUNIDADE}</td>
+              <td>{comunidade.ESPECIE}</td>
+              <td>{comunidade.QTD_HABITANTES}</td>
+              <td>{comunidade.PLANETA}</td>
+              <td>{comunidade.NACAO}</td>
+              <td>{comunidade.SISTEMA}</td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </Container>
   );
 };
 
-export default GerenciarEstrelas;
+export default Relatorios;
