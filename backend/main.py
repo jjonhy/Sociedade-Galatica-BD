@@ -193,7 +193,8 @@ def criar_federacao():
     nome_fd = data.get('nome_fd')
     data_fund = data.get('data_fund', 'SYSDATE')
 
-    data_fund = datetime.strptime(data_fund,"%Y-%m-%d")
+    if data_fund != "":
+        data_fund = datetime.strptime(data_fund,"%Y-%m-%d")
     
     try:
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
@@ -211,7 +212,8 @@ def inserir_dominancia():
     planeta = data.get('planeta')
     data_ini = data.get('data_ini', 'SYSDATE')
 
-    data_ini = datetime.strptime(data_ini,"%Y-%m-%d")
+    if data_ini != "":
+        data_ini = datetime.strptime(data_ini,"%Y-%m-%d")
     
     try:
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
