@@ -40,13 +40,12 @@ const handleSubmit = async (e) => {
       const role = role_response.data.role;
       if (role === 'OFICIAL   ') { // tambem nao mudar
         navigate('/oficial');
-      } else if (role === 'LIDER') {
-        navigate('/lider');
       } else if (role === 'CIENTISTA ') { // Espaço mantido conforme mencionado
         navigate('/cientista');
       } else if (role === 'COMANDANTE') {
         navigate('/comandante');
       }
+      window.location.reload(); // Recarrega a página após o redirecionamento
     }
   } catch (error) {
     // Handle Axios error response

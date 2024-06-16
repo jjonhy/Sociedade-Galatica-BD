@@ -8,21 +8,25 @@ import "./Header.css";
 
 const navLinks = [
   { title: "Líder de facção", url: "lider", role: "LIDER" },
-  { title: "Cientista", url: "cientista", role: "CIENTISTA" },
+  { title: "Cientista", url: "cientista", role: "CIENTISTA " },
   { title: "Comandante", url: "comandante", role: "COMANDANTE" },
-  { title: "Oficial", url: "oficial", role: "OFICIAL" },
+  { title: "Oficial", url: "oficial", role: "OFICIAL   " },
 ];
 
 const Header = () => {
   const navigate = useNavigate();
 
-  const { isAuthenticated, role } = useContext(AuthContext);
+  var { isAuthenticated, role } = useContext(AuthContext);
 
   const handleLogout = () => {
     console.log("Logging out");
     localStorage.removeItem('username');
+    isAuthenticated = false;
+    role = '';
     navigate('/');
+    window.location.reload(); // Recarrega a página após o redirecionamento
   };
+  console.log(role);
 
   return (
     <header>
@@ -41,11 +45,11 @@ const Header = () => {
               {navLinks.map((item, index) => (
                 <li
                   className={`nav_link ${
-                    isAuthenticated && item.role === role ? "active" : "disabled"
+                    isAuthenticated && (item.role === role || item.role === "LIDER") ? "active" : "disabled"
                   }`}
                   key={index}
                 >
-                  {isAuthenticated && item.role === role ? (
+                  {(isAuthenticated && (item.role === role || item.role === "LIDER")) ? (
                     <Link to={`/${item.url}`}>{item.title}</Link>
                   ) : (
                     <span>{item.title}</span>
