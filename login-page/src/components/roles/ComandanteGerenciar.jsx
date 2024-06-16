@@ -1,30 +1,49 @@
 import React, { useState } from 'react';
+import axios from "axios";
 
 const GerenciarEstrelas = () => {
-  const [cpi, setCpi] = useState('');
+  const [cpi] = useState('');
   const [nomeFd, setNomeFd] = useState('');
   const [planeta, setPlaneta] = useState('');
   const [dataFund, setDataFund] = useState('');
   const [dataIni, setDataIni] = useState('');
 
-  const incluirFederacao = async () => {
-    const response = await fetch('http://localhost:5000/incluir_federacao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi, nome_fd: nomeFd })
-    });
-    const data = await response.json();
-    alert(data.message);
+  const incluirFederacao = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:5000/incluir_federacao", {
+        cpi: localStorage.getItem('username'),
+        nome_fd: nomeFd
+      });
+      alert("Federação incluída!");
+      setNomeFd("");
+    } catch (error) {
+      if (error.response) {
+        alert(error.response.data.message);
+      } else if (error.request) {
+        alert("Erro na conexão com o servidor. Por favor, tente novamente mais tarde.");
+      } else {
+        alert("Ocorreu um erro inesperado.");
+      }
+    }
   };
 
-  const excluirFederacao = async () => {
-    const response = await fetch('http://localhost:5000/excluir_federacao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi })
-    });
-    const data = await response.json();
-    alert(data.message);
+  const excluirFederacao = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:5000/excluir_federacao", {
+        cpi: localStorage.getItem('username'),
+      });
+      alert("Federação incluída!");
+    } catch (error) {
+      if (error.response) {
+        alert(error.response.data.message);
+      } else if (error.request) {
+        alert("Erro na conexão com o servidor. Por favor, tente novamente mais tarde.");
+      } else {
+        alert("Ocorreu um erro inesperado.");
+      }
+    }
   };
 
   const criarFederacao = async () => {
@@ -50,12 +69,6 @@ const GerenciarEstrelas = () => {
   return (
     <div>
       <h2>Gerenciar Comandante</h2>
-      <div>
-        <label>
-          CPI:
-          <input type="text" value={cpi} onChange={(e) => setCpi(e.target.value)} />
-        </label>
-      </div>
       <div>
         <label>
           Nome da Federação:
