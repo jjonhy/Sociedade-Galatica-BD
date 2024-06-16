@@ -7,8 +7,8 @@ CORS(app)  # Habilita CORS para todos os endpoints
 app.secret_key = 'your_secret_key'  # Chave secreta para gerenciar sessões, altere para uma chave segura
 
 # Informações de conexão
-un = 'a12677492'
-pw = 'a12677492'
+un = 'a11796472'
+pw = 'a11796472'
 host = 'orclgrad1.icmc.usp.br'
 port = 1521
 service_name = 'pdb_elaine.icmc.usp.br'
