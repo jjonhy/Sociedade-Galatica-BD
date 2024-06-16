@@ -17,7 +17,7 @@ select * from federacao where federacao.nome = 'federal';
 select * from nacao where nacao.federacao = 'federal';
 
 BEGIN
-incluir_federacao_na_nacao ('123.456.789-10','federal');
+PacoteComandante.incluir_federacao_na_nacao ('123.456.789-10','federal');
 END;
 
 select * from nacao where nacao.federacao = 'federal';
@@ -28,7 +28,7 @@ select * from nacao where nacao.federacao = 'federal';
 select * from nacao where nacao.federacao = 'federal';
 
 BEGIN
-excluir_federacao_da_nacao ('123.456.789-10');
+PacoteComandante.excluir_federacao_da_nacao ('123.456.789-10');
 END;
 -- OK
 
@@ -36,14 +36,14 @@ select * from nacao where nacao.federacao = 'federal';
 -- OK
 
 BEGIN
-excluir_federacao_da_nacao ('123.456.789-10');
+PacoteComandante.excluir_federacao_da_nacao ('123.456.789-10');
 END;
 -- OK
 
 -- criar_federacao
 
 BEGIN
-criar_federacao ('123.456.789-10','piramide');
+PacoteComandante.criar_federacao ('123.456.789-10','piramide');
 END;
 -- OK
 
@@ -53,7 +53,7 @@ select * from nacao where nacao.federacao = 'piramide';
 select * from federacao where federacao.nome = 'piramide';
 
 BEGIN
-excluir_federacao_da_nacao ('123.456.789-10');
+PacoteComandante.excluir_federacao_da_nacao ('123.456.789-10');
 END;
 -- ok
 
@@ -61,7 +61,7 @@ select * from federacao where federacao.nome = 'piramide';
 -- ainda existe
 
 BEGIN
-criar_federacao ('123.456.789-10','ponte',TO_DATE('2000-01-01', 'yyyy-mm-dd'));
+PacoteComandante.criar_federacao ('123.456.789-10','ponte',TO_DATE('2000-01-01', 'yyyy-mm-dd'));
 END;
 -- ok
 
@@ -78,7 +78,7 @@ INSERT INTO PLANETA VALUES('dominado',1,1,'ok');
 select * from dominancia;
 
 BEGIN
-insere_dominancia('123.456.789-10','dominado');
+PacoteComandante.insere_dominancia('123.456.789-10','dominado');
 END;
 -- OK
 
@@ -86,13 +86,34 @@ select * from dominancia;
 -- OK
 
 BEGIN
-insere_dominancia('123.456.789-10','brasil');
+PacoteComandante.insere_dominancia('123.456.789-10','brasil');
 END;
 -- OK
 
 BEGIN
-insere_dominancia('111.456.789-10','brasil');
+PacoteComandante.insere_dominancia('111.456.789-10','brasil');
 END;
 -- OK
+
+-- planetas_em_potencial
+
+select * from dominancia;
+
+select * from lider;
+
+select * from
+    faccao join
+    lider
+    on faccao.lider = lider.cpi;
+
+select * from sistema JOIN ORBITA_PLANETA ON SISTEMA.ESTRELA = ORBITA_PLANETA.ESTRELA;
+
+INSERT INTO PLANETA VALUES('PODE_DOMINAR',1,1,'SIM');
+
+INSERT INTO	ORBITA_PLANETA VALUES('PODE_DOMINAR', 1, 900, 1000, 10);
+
+INSERT INTO	DOMINANCIA VALUES('marte', 'brasil', TO_DATE('2011-02-01', 'yyyy-mm-dd'), TO_DATE('2011-02-02', 'yyyy-mm-dd'));
+
+SELECT * FROM ORBITA_ESTRELA;
 
 -- FIM Testes

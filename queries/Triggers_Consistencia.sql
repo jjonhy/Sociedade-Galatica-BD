@@ -61,7 +61,7 @@ CREATE OR REPLACE TRIGGER Delete_Nacao_Federacao
     
     END AFTER EACH ROW;
 END Delete_Nacao_Federacao;
-
+/
 
 -- 2) O lider de uma faccao deve estar associado a uma naccao em que a faccao está presente.
 
@@ -92,6 +92,7 @@ CREATE OR REPLACE TRIGGER Insert_NacaoFaccao_After_Faccao
                 RAISE_APPLICATION_ERROR(-20016,'Erro: ' || SQLERRM);
     
 END Insert_NacaoFaccao_After_Faccao;
+/
 
 CREATE OR REPLACE TRIGGER Update_Lider_Faccao
     AFTER UPDATE OF LIDER ON FACCAO
@@ -116,6 +117,7 @@ CREATE OR REPLACE TRIGGER Update_Lider_Faccao
                 RAISE_APPLICATION_ERROR(-20016,'Erro: ' || SQLERRM);
     
 END Update_Lider_Faccao;
+/
 
 CREATE OR REPLACE TRIGGER Update_Lider_Nacao
     AFTER UPDATE OF NACAO ON LIDER
@@ -142,7 +144,7 @@ CREATE OR REPLACE TRIGGER Update_Lider_Nacao
                 RAISE_APPLICATION_ERROR(-20016,'Erro: ' || SQLERRM);
     
 END Update_Lider_Nacao;
-
+/
 
 -- 3) A quantidade de nacoes, na tabela Faccao dever estar sempre atualizada.
 
@@ -168,6 +170,7 @@ CREATE OR REPLACE TRIGGER Insert_Faccao_QtdNacoes
                 DBMS_OUTPUT.put_line('Erro: ' || SQLERRM);
     
 END Insert_Faccao_QtdNacoes;
+/
 
 CREATE OR REPLACE TRIGGER Update_Faccao_Qtd_Nacoes
     AFTER UPDATE ON NACAO_FACCAO
@@ -193,6 +196,7 @@ CREATE OR REPLACE TRIGGER Update_Faccao_Qtd_Nacoes
                 RAISE_APPLICATION_ERROR(-20016,'Erro: ' || SQLERRM);
     
 END Update_Faccao_Qtd_Nacoes;
+/
 
 CREATE OR REPLACE TRIGGER Delete_Faccao_Qtd_Nacoes
     AFTER DELETE ON NACAO_FACCAO
@@ -210,7 +214,7 @@ CREATE OR REPLACE TRIGGER Delete_Faccao_Qtd_Nacoes
                 RAISE_APPLICATION_ERROR(-20016,'Erro: ' || SQLERRM);
     
 END Delete_Faccao_Qtd_Nacoes;
-
+/
 
 -- 4) Na tabela Nacao, o atributo qtd_planetas deve considerar somente dominancias atuais.
 
@@ -240,6 +244,7 @@ CREATE OR REPLACE TRIGGER Insert_Nacao_Qtd_Planetas
                 RAISE_APPLICATION_ERROR(-20016,'Erro: ' || SQLERRM);
     
 END Insert_Nacao_Qtd_Planetas;
+/
 
 CREATE OR REPLACE TRIGGER Update_Nacao_Qtd_Planetas
     AFTER UPDATE ON DOMINANCIA
@@ -269,6 +274,7 @@ CREATE OR REPLACE TRIGGER Update_Nacao_Qtd_Planetas
                 RAISE_APPLICATION_ERROR(-20016,'Erro: ' || SQLERRM);
     
 END Update_Nacao_Qtd_Planetas;
+/
 
 CREATE OR REPLACE TRIGGER Delete_Nacao_Qtd_Planetas
     AFTER DELETE ON DOMINANCIA
@@ -288,4 +294,153 @@ CREATE OR REPLACE TRIGGER Delete_Nacao_Qtd_Planetas
                 RAISE_APPLICATION_ERROR(-20016,'Erro: ' || SQLERRM);
     
 END Delete_Nacao_Qtd_Planetas;
+/
+-- 5) Garantir que nenhuma Dominancia seja inserida com sobreposicao de data
 
+CREATE OR REPLACE TRIGGER Insert_Verify_Dates_Dominancia
+    BEFORE INSERT ON DOMINANCIA
+    FOR EACH ROW
+    
+    DECLARE
+    
+    CURSOR c_dominancias IS SELECT * FROM DOMINANCIA WHERE DOMINANCIA.NACAO = :NEW.NACAO AND DOMINANCIA.PLANETA = :NEW.PLANETA;
+    v_dominancias c_dominancias%ROWTYPE;/*ROWTYPE: associado a cursor*/
+    
+    interseccao_datas EXCEPTION;
+    
+    BEGIN
+        
+        OPEN c_dominancias;
+    
+        LOOP
+            FETCH c_dominancias INTO v_dominancias; /*recupera tupla*/
+            /*sai do loop se n�o h� mais tuplas ou se resposta vazia*/
+            EXIT WHEN c_dominancias%NOTFOUND;
+            IF :NEW.DATA_INI <= v_dominancias.DATA_INI AND (:NEW.DATA_FIM >= v_dominancias.DATA_INI OR :NEW.DATA_FIM IS NULL) THEN
+                RAISE interseccao_datas;
+            ELSIF :NEW.DATA_INI > v_dominancias.DATA_INI AND :NEW.DATA_INI < v_dominancias.DATA_FIM THEN
+                RAISE interseccao_datas;
+            END IF;
+        END LOOP;
+        
+        CLOSE c_dominancias;
+    
+        EXCEPTION
+            WHEN interseccao_datas
+                THEN RAISE_APPLICATION_ERROR(-20201, 'Ja existe uma dominancia desse planeta entre essas datas.');
+            WHEN OTHERS
+                THEN
+                DBMS_OUTPUT.put_line('Erro: ' || SQLERRM);
+                RAISE_APPLICATION_ERROR(-20016,'Erro: ' || SQLERRM);
+    
+END Insert_Verify_Dates_Dominancia;
+/
+
+-- 6) Garantir que nenhuma Habitacao seja inserida com sobreposicao de data
+
+CREATE OR REPLACE TRIGGER Insert_Verify_Dates_Habitacao
+    BEFORE INSERT ON HABITACAO
+    FOR EACH ROW
+    
+    DECLARE
+    
+    CURSOR c_habitacoes IS SELECT * FROM HABITACAO WHERE HABITACAO.PLANETA = :NEW.PLANETA
+                                                    AND HABITACAO.ESPECIE = :NEW.ESPECIE
+                                                    AND HABITACAO.COMUNIDADE = :NEW.COMUNIDADE;
+    v_habitacoes c_habitacoes%ROWTYPE;/*ROWTYPE: associado a cursor*/
+    
+    interseccao_datas EXCEPTION;
+    
+    BEGIN
+        
+        OPEN c_habitacoes;
+    
+        LOOP
+            FETCH c_habitacoes INTO v_habitacoes; /*recupera tupla*/
+            /*sai do loop se n�o h� mais tuplas ou se resposta vazia*/
+            EXIT WHEN c_habitacoes%NOTFOUND;
+            IF :NEW.DATA_INI <= v_habitacoes.DATA_INI AND (:NEW.DATA_FIM >= v_habitacoes.DATA_INI OR :NEW.DATA_FIM IS NULL) THEN
+                RAISE interseccao_datas;
+            ELSIF :NEW.DATA_INI > v_habitacoes.DATA_INI AND :NEW.DATA_INI < v_habitacoes.DATA_FIM THEN
+                RAISE interseccao_datas;
+            END IF;
+        END LOOP;
+        
+        CLOSE c_habitacoes;
+    
+        EXCEPTION
+            WHEN interseccao_datas
+                THEN RAISE_APPLICATION_ERROR(-20201, 'Ja existe uma dominancia desse planeta entre essas datas.');
+            WHEN OTHERS
+                THEN
+                DBMS_OUTPUT.put_line('Erro: ' || SQLERRM);
+                RAISE_APPLICATION_ERROR(-20016,'Erro: ' || SQLERRM);
+    
+END Insert_Verify_Dates_Dominancia;
+/
+
+-- 7) Garantir que a data fim e inicio de Dominancia e Habitacao sejam menores que sysdate
+
+CREATE OR REPLACE TRIGGER Dominancia_Date_Less_Sysdate
+    AFTER INSERT ON DOMINANCIA
+    FOR EACH ROW
+    
+    DECLARE
+    
+    date_less_sysdate EXCEPTION;
+    
+    BEGIN
+    
+        IF :NEW.DATA_INI >= SYSDATE OR :NEW.DATA_FIM >= SYSDATE THEN
+            RAISE date_less_sysdate;
+        END IF;
+    
+        EXCEPTION
+            WHEN date_less_sysdate
+                THEN RAISE_APPLICATION_ERROR(-20210, 'Datas precisam ser menores ou iguais a data atual. Nao pode haver datas futuras');
+            WHEN OTHERS THEN
+                DBMS_OUTPUT.put_line('Erro: ' || SQLERRM);
+                RAISE_APPLICATION_ERROR(-20016,'Erro: ' || SQLERRM);
+    
+END Dominancia_Date_Less_Sysdate;
+/
+
+CREATE OR REPLACE TRIGGER Habitacao_Date_Less_Sysdate
+    AFTER INSERT ON HABITACAO
+    FOR EACH ROW
+    
+    DECLARE
+    
+    date_less_sysdate EXCEPTION;
+    
+    BEGIN
+    
+        IF :NEW.DATA_INI >= SYSDATE OR :NEW.DATA_FIM >= SYSDATE THEN
+            RAISE date_less_sysdate;
+        END IF;
+    
+        EXCEPTION
+            WHEN date_less_sysdate
+                THEN RAISE_APPLICATION_ERROR(-20210, 'Datas precisam ser menores ou iguais a data atual. Nao pode haver datas futuras');
+            WHEN OTHERS THEN
+                DBMS_OUTPUT.put_line('Erro: ' || SQLERRM);
+                RAISE_APPLICATION_ERROR(-20016,'Erro: ' || SQLERRM);
+    
+END Habitacao_Date_Less_Sysdate;
+/
+-- 8) Adicionar a Estrela a um sistema com um nome temporario (id da estrela) para garantir que toda estrela inserida esteja num sistema
+
+CREATE OR REPLACE TRIGGER Add_Estrela_To_Sistema
+    AFTER INSERT ON ESTRELA
+    FOR EACH ROW
+    
+    BEGIN
+    
+        INSERT INTO SISTEMA VALUES (:NEW.ID_ESTRELA,:NEW.ID_ESTRELA);
+    
+        EXCEPTION
+            WHEN OTHERS THEN
+                DBMS_OUTPUT.put_line('Erro: ' || SQLERRM);
+                RAISE_APPLICATION_ERROR(-20016,'Erro: ' || SQLERRM);
+    
+END Add_Estrela_To_Sistema;

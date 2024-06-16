@@ -248,3 +248,71 @@ UPDATE DOMINANCIA
 SELECT * FROM nacao WHERE nacao.nome = 'brasil';
 
 -- TO_DATE('2000-01-01', 'yyyy-mm-dd')
+
+-- Teste:
+
+-- Insert_Verify_Dates_Dominancia
+
+select * from dominancia;
+
+INSERT INTO	DOMINANCIA VALUES('terra', 'imperio', TO_DATE('1800-01-01', 'yyyy-mm-dd'), TO_DATE('1850-01-01', 'yyyy-mm-dd'));
+-- Ok
+
+INSERT INTO	DOMINANCIA VALUES('terra', 'imperio', TO_DATE('1800-01-01', 'yyyy-mm-dd'), TO_DATE('1850-01-01', 'yyyy-mm-dd'));
+/*
+    Erro de SQL: ORA-20201: Ja existe uma dominancia desse planeta entre essas datas.
+    ORA-06512: em "A11796382.INSERT_VERIFY_DATES_DOMINANCIA", line 27
+    ORA-04088: erro durante a execução do gatilho 'A11796382.INSERT_VERIFY_DATES_DOMINANCIA'
+*/
+
+INSERT INTO	DOMINANCIA VALUES('terra', 'imperio', TO_DATE('1810-01-01', 'yyyy-mm-dd'), TO_DATE('1840-01-01', 'yyyy-mm-dd'));
+-- Erro de SQL: ORA-20201
+
+INSERT INTO	DOMINANCIA VALUES('terra', 'imperio', TO_DATE('1810-01-01', 'yyyy-mm-dd'), TO_DATE('1890-01-01', 'yyyy-mm-dd'));
+-- Erro de SQL: ORA-20201
+
+INSERT INTO	DOMINANCIA VALUES('terra', 'imperio', TO_DATE('1890-01-01', 'yyyy-mm-dd'), TO_DATE('1895-01-01', 'yyyy-mm-dd'));
+-- Ok
+
+select * from dominancia;
+
+INSERT INTO	DOMINANCIA VALUES('marte', 'imperio', TO_DATE('1900-01-01', 'yyyy-mm-dd'), TO_DATE('2000-01-01', 'yyyy-mm-dd'));
+-- ok
+
+INSERT INTO	DOMINANCIA VALUES('marte', 'imperio', TO_DATE('1850-01-01', 'yyyy-mm-dd'), NULL);
+-- Erro de SQL: ORA-20201
+
+-- Teste:
+
+-- Insert_Verify_Dates_Habitacao
+
+-- Mesmo codigo, ou seja, mesmos testes
+
+-- Teste:
+
+-- Dominancia_Date_Less_Sysdate
+
+INSERT INTO	DOMINANCIA VALUES('marte', 'imperio', TO_DATE('2500-01-01', 'yyyy-mm-dd'), NULL);
+/*
+Erro de SQL: ORA-20210: Datas precisam ser menores ou iguais a data atual. Nao pode haver datas futuras
+ORA-06512: em "A11796382.DOMINANCIA_DATE_LESS_SYSDATE", line 13
+ORA-04088: erro durante a execução do gatilho 'A11796382.DOMINANCIA_DATE_LESS_SYSDATE'
+*/
+
+INSERT INTO	DOMINANCIA VALUES('marte', 'imperio', TO_DATE('2010-01-01', 'yyyy-mm-dd'), TO_DATE('2025-01-01', 'yyyy-mm-dd'));
+-- Erro de SQL: ORA-20210
+
+-- Habitacao_Date_Less_Sysdate 
+
+-- Mesmos testes, mesmo codigo
+
+-- Teste:
+
+-- Add_Estrela_To_Sistema
+
+INSERT INTO	ESTRELA	VALUES('000', 'ioio', 'branca', 10000, 2, 10, 0);
+-- Ok
+
+select * from SISTEMA where SISTEMA.ESTRELA='000';
+-- 000	000
+-- Ok
