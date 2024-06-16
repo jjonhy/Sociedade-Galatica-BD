@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, session, redirect
 from flask_cors import CORS
 import oracledb
 import json
-import cx_Oracle
 
 app = Flask(__name__)
 CORS(app)  # Habilita CORS para todos os endpoints
@@ -320,8 +319,8 @@ def buscar_estrela():
             with connection.cursor() as cursor:
                 result = cursor.callfunc('busca_estrela', cx_Oracle.OBJECT, [id_estrela])
                 return jsonify({"message": "Estrela encontrada com sucesso", "data": result}), 200
-    except cx_Oracle.Error as error:
-        return jsonify({"message": f"An error occurred: {error}"}), 500
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
 
 @app.route('/editar_estrela', methods=['PUT'])
 def editar_estrela():
@@ -341,8 +340,8 @@ def editar_estrela():
                 cursor.callproc('PacoteCientista.edita_estrela', [id_estrela, novo_id_estrela, x, y, z, nome, classificacao, massa])
                 connection.commit()
                 return jsonify({"message": "Estrela editada com sucesso"}), 200
-    except cx_Oracle.Error as error:
-        return jsonify({"message": f"An error occurred: {error}"}), 500
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
 
 @app.route('/deletar_estrela/<id_estrela>', methods=['DELETE'])
 def deletar_estrela(id_estrela):
@@ -352,8 +351,8 @@ def deletar_estrela(id_estrela):
                 cursor.callproc('PacoteCientista.deleta_estrela', [id_estrela])
                 connection.commit()
                 return jsonify({"message": "Estrela deletada com sucesso"}), 200
-    except cx_Oracle.Error as error:
-        return jsonify({"message": f"An error occurred: {error}"}), 500
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
 
 
 @app.route('/relatorios/<string:tipo>', methods=['GET'])
@@ -374,8 +373,8 @@ def relatorios(tipo):
         for row in cursor:
             result.append(row)
         return jsonify(result)
-    except cx_Oracle.Error as error:
-        return str(error), 400
+    except Exception as e:
+        return str(e), 400
     finally:
         cursor.close()
 
