@@ -38,7 +38,7 @@ const handleSubmit = async (e) => {
       localStorage.setItem('username', username); // Armazena o username no localStorage
       const role_response = await axios.post('http://localhost:5000/role', { username });
       const role = role_response.data.role;
-      if (role === 'OFICIAL') {
+      if (role === 'OFICIAL   ') { // tambem nao mudar
         navigate('/oficial');
       } else if (role === 'LIDER') {
         navigate('/lider');

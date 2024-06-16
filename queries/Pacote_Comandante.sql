@@ -338,7 +338,12 @@ CREATE OR REPLACE PACKAGE BODY PacoteComandante AS
                 GROUP BY C.ESPECIE;
             RETURN c_return;
     END planetas_em_potencial;
-    
+        
+    END PacoteComandante;
+/
+
+
+
     
     
     

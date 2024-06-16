@@ -200,5 +200,26 @@ def consulta_relatorio_sistemas():
     except Exception as e:
         raise e
     
+@app.route('/api/relatorio/oficial', methods=['GET'])
+def consulta_relatorio_oficial():
+    try:
+        relatorio = consulta_evolucao_habitantes_oficial()
+        return jsonify(relatorio), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+
+def consulta_evolucao_habitantes_oficial():
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                # Chamar a função do package PacoteOficial para obter informações de evolução de habitantes
+                cursor.callproc('PacoteOficial.evolucao_habitantes', ['111.111.111-15'])  # Substitua pelo CPI do oficial correto
+                # Exemplo básico de como obter os resultados
+                result = cursor.fetchall()
+                return {"tipo": "oficial", "dados": result}
+    except Exception as e:
+        raise e
+
+
 if __name__ == '__main__':
     app.run(debug=True)
