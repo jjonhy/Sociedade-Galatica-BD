@@ -16,6 +16,7 @@ const CientistaGerenciar = () => {
     massa: ''
   });
   const [formData2, setFormData2] = useState({
+    userId: localStorage.getItem('username'),
     id: '',
     idNovo: '',
     x: '',
@@ -56,7 +57,7 @@ const CientistaGerenciar = () => {
   const handleSubmitReadEstrela = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/buscar_estrela', { id_estrela: idEstrela });
+      const response = await axios.post('http://localhost:5000/buscar_estrela', { id_estrela: idEstrela, userId: localStorage.getItem("username") });
       const dados = response.data.dados[0]; // Acessando o array de dados
       const estrela = {
         id_estrela: dados[0],
@@ -86,13 +87,15 @@ const CientistaGerenciar = () => {
 
   const handleSubmitDeleteEstrela = async (e) => {
     e.preventDefault();
+    const userId = localStorage.getItem('username'); // Assuming 'userId' is stored in localStorage
     try {
-      await axios.delete(`http://localhost:5000/deletar_estrela/${idEstrelaApagar}`);
+      await axios.delete(`http://localhost:5000/deletar_estrela/${idEstrelaApagar}?user_id=${userId}`);
       alert("Estrela apagada com sucesso!");
     } catch (error) {
       console.error('Erro ao apagar estrela', error);
     }
   };
+  
 
   return (
     <Container className="gerenciar-cientista">
@@ -138,8 +141,8 @@ const CientistaGerenciar = () => {
         )}
 
         <form onSubmit={handleSubmitUpdate}>
-          <input type="text" name="id_estrela" placeholder="ID" value={formData2.id} onChange={handleInputChange2} required />
-          <input type="text" name="id_estrelaNovo" placeholder="IDNOVO" value={formData2.idNovo} onChange={handleInputChange2} required />
+          <input type="text" name="id" placeholder="ID" value={formData2.id} onChange={handleInputChange2} required />
+          <input type="text" name="idNovo" placeholder="IDNOVO" value={formData2.idNovo} onChange={handleInputChange2} required />
           <input type="text" name="x" placeholder="X" value={formData2.x} onChange={handleInputChange2} required />
           <input type="text" name="y" placeholder="Y" value={formData2.y} onChange={handleInputChange2} required />
           <input type="text" name="z" placeholder="Z" value={formData2.z} onChange={handleInputChange2} required />
