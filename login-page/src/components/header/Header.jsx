@@ -1,35 +1,35 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Container } from "reactstrap";
-import "./Header.css";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from 'react-router-dom';
+
+import "./Header.css";
 
 const navLinks = [
-  {
-    title: "Líder de facção",
-    url: "lider",
-  },
-  {
-    title: "Cientista",
-    url: "cientista",
-  },
-  {
-    title: "Comandante",
-    url: "comandante",
-  },
-  {
-    title: "Oficial",
-    url: "oficial",
-  },
+  { title: "Líder de facção", url: "lider", role: "LIDER" },
+  { title: "Cientista", url: "cientista", role: "CIENTISTA " },
+  { title: "Comandante", url: "comandante", role: "COMANDANTE" },
+  { title: "Oficial", url: "oficial", role: "OFICIAL   " },
 ];
 
-const handleLogout = () => {
-  console.log(`loging out`);
-};
+const Header = () => {
+  const navigate = useNavigate();
 
-function Header() {
+  var { isAuthenticated, role } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    console.log("Logging out");
+    localStorage.removeItem('username');
+    isAuthenticated = false;
+    role = '';
+    navigate('/');
+    window.location.reload(); // Recarrega a página após o redirecionamento
+  };
+  console.log(role);
+
   return (
     <header>
-      {/* Your header content goes here */}
       <Container>
         <div className="nav_bar">
           <div className="nav_bar_logo">
@@ -43,25 +43,34 @@ function Header() {
           <div className="nav_bar_links">
             <ul className="nav_list">
               {navLinks.map((item, index) => (
-                <li className="nav_link" key={index}>
-                  <a href={item.url}>{item.title}</a>
+                <li
+                  className={`nav_link ${
+                    isAuthenticated && (item.role === role || item.role === "LIDER") ? "active" : "disabled"
+                  }`}
+                  key={index}
+                >
+                  {(isAuthenticated && (item.role === role || item.role === "LIDER")) ? (
+                    <Link to={`/${item.url}`}>{item.title}</Link>
+                  ) : (
+                    <span>{item.title}</span>
+                  )}
                 </li>
               ))}
             </ul>
           </div>
-          <div className="user_icon">
-            <span>
-              <Link to="/">
+          {isAuthenticated && (
+            <div className="user_icon">
+              <span>
                 <button className="logout-button" onClick={handleLogout}>
                   Logout
                 </button>
-              </Link>
-            </span>
-          </div>
+              </span>
+            </div>
+          )}
         </div>
       </Container>
     </header>
   );
-}
+};
 
 export default Header;

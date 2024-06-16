@@ -348,8 +348,12 @@ CREATE OR REPLACE PACKAGE BODY PacoteComandante AS
                                     );
             RETURN c_return;
     END planetas_em_potencial;
+        
+    END PacoteComandante;
+/
 
-END PacoteComandante;
+
+
     
     
     

@@ -24,6 +24,13 @@ header {
 .nav_list li a:hover {
   color: yellow;
 }
+.nav_list li.disabled span {
+  color: gray;
+  cursor: not-allowed;
+}
+.nav_list li.active a {
+  color: white; /* Link ativo deve estar em branco */
+}
 .nav_bar_logo h2 {
   color: #ffff;
 }
