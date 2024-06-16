@@ -221,5 +221,61 @@ def consulta_evolucao_habitantes_oficial():
         raise e
 
 
+@app.route('/estrelas', methods=['GET', 'POST'])
+def gerenciar_estrelas():
+    if request.method == 'GET':
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM ESTRELA")
+        estrelas = cursor.fetchall()
+        cursor.close()
+        return jsonify(estrelas)
+    
+    if request.method == 'POST':
+        data = request.get_json()
+        cursor = conn.cursor()
+        try:
+            cursor.callproc('PacoteCientista.cria_estrela', [data['id'], data['x'], data['y'], data['z'], data['nome'], data['classificacao'], data['massa']])
+            conn.commit()
+            return '', 201
+        except cx_Oracle.Error as error:
+            return str(error), 400
+        finally:
+            cursor.close()
+
+@app.route('/estrelas/<int:id>', methods=['DELETE'])
+def deletar_estrela(id):
+    cursor = conn.cursor()
+    try:
+        cursor.callproc('PacoteCientista.deleta_estrela', [id])
+        conn.commit()
+        return '', 204
+    except cx_Oracle.Error as error:
+        return str(error), 400
+    finally:
+        cursor.close()
+
+@app.route('/relatorios/<string:tipo>', methods=['GET'])
+def relatorios(tipo):
+    limite = request.args.get('limite', default=10, type=int)
+    cursor = conn.cursor()
+    try:
+        if tipo == 'estrelas':
+            cursor.callproc('PacoteCientista.relatorio_estrela', [limite])
+        elif tipo == 'planetas':
+            cursor.callproc('PacoteCientista.relatorio_planeta', [limite])
+        elif tipo == 'sistemas':
+            cursor.callproc('PacoteCientista.relatorio_sistema', [limite])
+        else:
+            return 'Tipo inválido', 400
+
+        result = []
+        for row in cursor:
+            result.append(row)
+        return jsonify(result)
+    except cx_Oracle.Error as error:
+        return str(error), 400
+    finally:
+        cursor.close()
+
 if __name__ == '__main__':
     app.run(debug=True)
