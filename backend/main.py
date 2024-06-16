@@ -104,6 +104,63 @@ def incluir_federacao():
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
 
+@app.route('/api/alterar_nome_faccao', methods=['POST'])
+def alterar_nome_faccao():
+    data = request.json
+    cpi = data.get('cpi')
+    novoNome = data.get('novoNome')
+    
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                cursor.callproc('PacoteLider.alterar_nome_faccao', [cpi, novoNome])
+        return jsonify({"message": "Nome alterado com sucesso"}), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+    
+@app.route('/api/indicar_novo_lider_faccao', methods=['POST'])
+def indicar_novo_lider_faccao():
+    data = request.json
+    cpi = data.get('cpi')
+    novoLider = data.get('novoLider')
+    
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                cursor.callproc('PacoteLider.indicar_novo_lider_faccao', [cpi, novoLider])
+        return jsonify({"message": "Nome alterado com sucesso"}), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+    
+@app.route('/api/remover_faccao_de_nacao', methods=['POST'])
+def remover_faccao_de_nacao():
+    data = request.json
+    cpi = data.get('cpi')
+    faccao = data.get('faccao')
+    nacao = data.get('nacao')
+    
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                cursor.callproc('PacoteLider.remove_faccao_da_nacao', [cpi, nacao, faccao])
+        return jsonify({"message": "Nome alterado com sucesso"}), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+    
+@app.route('/api/credenciar_comunidades', methods=['POST'])
+def credenciar_comunidades():
+    data = request.json
+    cpi = data.get('cpi')
+    
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                cursor.callproc('PacoteLider.credenciar_comunidades', [cpi])
+        return jsonify({"message": "Credenciamento realizado com sucesso"}), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+    
+
 @app.route('/excluir_federacao', methods=['POST'])
 def excluir_federacao():
     data = request.json
@@ -116,8 +173,7 @@ def excluir_federacao():
         return jsonify({"message": "Federação excluída com sucesso"}), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
-
-
+    
 @app.route('/criar_federacao', methods=['POST'])
 def criar_federacao():
     data = request.json
@@ -152,7 +208,7 @@ def inserir_dominancia():
 def obter_relatorio(tipo):
     try:
         if tipo == 'estrela':
-            relatorio = consulta_relatorio_estrelas()
+            relatorio = consulta_informacoes_estrategicas()
         elif tipo == 'planeta':
             relatorio = consulta_relatorio_planetas()
         elif tipo == 'sistema':
@@ -164,12 +220,34 @@ def obter_relatorio(tipo):
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
 
+def consulta_informacoes_estrategicas():
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                # Criar tipos de dados Oracle para os parâmetros de saída
+                type_informacoes_1 = cursor.var(oracledb.DB_TYPE_OBJECT, typename="T_INFORMACOES_1_TYPE", arraysize=100)
+                type_informacoes_2 = cursor.var(oracledb.DB_TYPE_OBJECT, typename="T_INFORMACOES_2_TYPE", arraysize=100)
+
+                # Chamar a procedure do package PacoteComandante para obter informações estratégicas
+                cursor.callproc('PacoteComandante.consulta_informacoes_estrategicas', [type_informacoes_1, type_informacoes_2])
+
+                # Obter os resultados dos parâmetros de saída
+                informacoes_1 = type_informacoes_1.getvalue()
+                informacoes_2 = type_informacoes_2.getvalue()
+
+                result_1 = [dict(zip(row.keys(), row)) for row in informacoes_1]
+                result_2 = [dict(zip(row.keys(), row)) for row in informacoes_2]
+
+                return {"informacoes_1": result_1, "informacoes_2": result_2}
+    except Exception as e:
+        raise e
+    
 def consulta_relatorio_estrelas():
     try:
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 # Chamar a função do package PacoteComandante para obter informações de estrelas
-                cursor.callproc('PacoteComandante.consulta_informacoes_estrategicas', [None, None])
+                cursor.callfunc('PacoteComandante.consulta_informacoes_estrategicas', [None, None])
                 # Exemplo básico de como obter os resultados
                 result = cursor.fetchall()
                 return {"tipo": "estrela", "dados": result}
