@@ -1,91 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-const GerenciarEstrelas = () => {
-  const [cpi, setCpi] = useState('');
-  const [nomeFd, setNomeFd] = useState('');
-  const [planeta, setPlaneta] = useState('');
-  const [dataFund, setDataFund] = useState('');
-  const [dataIni, setDataIni] = useState('');
+const CientistaGerenciar = () => {
+  const [estrelas, setEstrelas] = useState([]);
+  const [formData, setFormData] = useState({
+    id: '',
+    x: '',
+    y: '',
+    z: '',
+    nome: '',
+    classificacao: '',
+    massa: ''
+  });
+  
+  useEffect(() => {
+    fetchEstrelas();
+  }, []);
 
-  const incluirFederacao = async () => {
-    const response = await fetch('http://localhost:5000/incluir_federacao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi, nome_fd: nomeFd })
-    });
-    const data = await response.json();
-    alert(data.message);
+  const fetchEstrelas = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/estrelas');
+      setEstrelas(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar estrelas', error);
+    }
   };
 
-  const excluirFederacao = async () => {
-    const response = await fetch('http://localhost:5000/excluir_federacao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi })
-    });
-    const data = await response.json();
-    alert(data.message);
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const criarFederacao = async () => {
-    const response = await fetch('http://localhost:5000/criar_federacao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi, nome_fd: nomeFd, data_fund: dataFund })
-    });
-    const data = await response.json();
-    alert(data.message);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('http://localhost:5000/estrelas', formData);
+      fetchEstrelas();
+    } catch (error) {
+      console.error('Erro ao criar/editar estrela', error);
+    }
   };
 
-  const inserirDominancia = async () => {
-    const response = await fetch('http://localhost:5000/inserir_dominancia', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi, planeta, data_ini: dataIni })
-    });
-    const data = await response.json();
-    alert(data.message);
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/estrelas/${id}`);
+      fetchEstrelas();
+    } catch (error) {
+      console.error('Erro ao deletar estrela', error);
+    }
   };
 
   return (
     <div>
-      <h2>Gerenciar Comandante</h2>
-      <div>
-        <label>
-          CPI:
-          <input type="text" value={cpi} onChange={(e) => setCpi(e.target.value)} />
-        </label>
-      </div>
-      <div>
-        <label>
-          Nome da Federação:
-          <input type="text" value={nomeFd} onChange={(e) => setNomeFd(e.target.value)} />
-        </label>
-      </div>
-      <div>
-        <label>
-          Data de Fundação:
-          <input type="date" value={dataFund} onChange={(e) => setDataFund(e.target.value)} />
-        </label>
-      </div>
-      <button onClick={incluirFederacao}>Incluir Federação</button>
-      <button onClick={excluirFederacao}>Excluir Federação</button>
-      <button onClick={criarFederacao}>Criar Federação</button>
-      <div>
-        <label>
-          Planeta:
-          <input type="text" value={planeta} onChange={(e) => setPlaneta(e.target.value)} />
-        </label>
-      </div>
-      <div>
-        <label>
-          Data de Início da Dominância:
-          <input type="date" value={dataIni} onChange={(e) => setDataIni(e.target.value)} />
-        </label>
-      </div>
-      <button onClick={inserirDominancia}>Inserir Dominância</button>
+      <h1>Gerenciar Estrelas</h1>
+      <form onSubmit={handleSubmit}>
+        <input type="text" name="id" placeholder="ID" value={formData.id} onChange={handleInputChange} required />
+        <input type="text" name="x" placeholder="X" value={formData.x} onChange={handleInputChange} required />
+        <input type="text" name="y" placeholder="Y" value={formData.y} onChange={handleInputChange} required />
+        <input type="text" name="z" placeholder="Z" value={formData.z} onChange={handleInputChange} required />
+        <input type="text" name="nome" placeholder="Nome" value={formData.nome} onChange={handleInputChange} />
+        <input type="text" name="classificacao" placeholder="Classificação" value={formData.classificacao} onChange={handleInputChange} />
+        <input type="text" name="massa" placeholder="Massa" value={formData.massa} onChange={handleInputChange} />
+        <button type="submit">Salvar</button>
+      </form>
+      <ul>
+        {estrelas.map((estrela) => (
+          <li key={estrela.id}>
+            {estrela.nome} (ID: {estrela.id}) 
+            <button onClick={() => handleDelete(estrela.id)}>Deletar</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
 
-export default GerenciarEstrelas;
+export default CientistaGerenciar;

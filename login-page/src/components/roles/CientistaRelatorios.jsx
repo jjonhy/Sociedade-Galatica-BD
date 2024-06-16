@@ -1,91 +1,37 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
-const GerenciarEstrelas = () => {
-  const [cpi, setCpi] = useState('');
-  const [nomeFd, setNomeFd] = useState('');
-  const [planeta, setPlaneta] = useState('');
-  const [dataFund, setDataFund] = useState('');
-  const [dataIni, setDataIni] = useState('');
+const CientistaRelatorio = () => {
+  const [tipo, setTipo] = useState('estrelas');
+  const [limite, setLimite] = useState(10);
+  const [dados, setDados] = useState([]);
 
-  const incluirFederacao = async () => {
-    const response = await fetch('http://localhost:5000/incluir_federacao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi, nome_fd: nomeFd })
-    });
-    const data = await response.json();
-    alert(data.message);
-  };
-
-  const excluirFederacao = async () => {
-    const response = await fetch('http://localhost:5000/excluir_federacao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi })
-    });
-    const data = await response.json();
-    alert(data.message);
-  };
-
-  const criarFederacao = async () => {
-    const response = await fetch('http://localhost:5000/criar_federacao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi, nome_fd: nomeFd, data_fund: dataFund })
-    });
-    const data = await response.json();
-    alert(data.message);
-  };
-
-  const inserirDominancia = async () => {
-    const response = await fetch('http://localhost:5000/inserir_dominancia', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cpi, planeta, data_ini: dataIni })
-    });
-    const data = await response.json();
-    alert(data.message);
+  const fetchRelatorio = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/relatorios/${tipo}?limite=${limite}`);
+      setDados(response.data);
+    } catch (error) {
+      console.error('Erro ao buscar relatório', error);
+    }
   };
 
   return (
     <div>
-      <h2>Gerenciar Comandante</h2>
-      <div>
-        <label>
-          CPI:
-          <input type="text" value={cpi} onChange={(e) => setCpi(e.target.value)} />
-        </label>
-      </div>
-      <div>
-        <label>
-          Nome da Federação:
-          <input type="text" value={nomeFd} onChange={(e) => setNomeFd(e.target.value)} />
-        </label>
-      </div>
-      <div>
-        <label>
-          Data de Fundação:
-          <input type="date" value={dataFund} onChange={(e) => setDataFund(e.target.value)} />
-        </label>
-      </div>
-      <button onClick={incluirFederacao}>Incluir Federação</button>
-      <button onClick={excluirFederacao}>Excluir Federação</button>
-      <button onClick={criarFederacao}>Criar Federação</button>
-      <div>
-        <label>
-          Planeta:
-          <input type="text" value={planeta} onChange={(e) => setPlaneta(e.target.value)} />
-        </label>
-      </div>
-      <div>
-        <label>
-          Data de Início da Dominância:
-          <input type="date" value={dataIni} onChange={(e) => setDataIni(e.target.value)} />
-        </label>
-      </div>
-      <button onClick={inserirDominancia}>Inserir Dominância</button>
+      <h1>Relatórios</h1>
+      <select onChange={(e) => setTipo(e.target.value)}>
+        <option value="estrelas">Estrelas</option>
+        <option value="planetas">Planetas</option>
+        <option value="sistemas">Sistemas</option>
+      </select>
+      <input type="number" value={limite} onChange={(e) => setLimite(e.target.value)} />
+      <button onClick={fetchRelatorio}>Buscar Relatório</button>
+      <ul>
+        {dados.map((item, index) => (
+          <li key={index}>{JSON.stringify(item)}</li>
+        ))}
+      </ul>
     </div>
   );
 };
 
-export default GerenciarEstrelas;
+export default CientistaRelatorio;
