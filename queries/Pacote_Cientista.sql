@@ -20,7 +20,7 @@ CREATE OR REPLACE PACKAGE PacoteCientista AS
     e_coordenadasDuplicadas EXCEPTION;
 
     PROCEDURE cria_estrela(p_id_estrela estrela.id_estrela%type, p_x estrela.X%TYPE, p_y estrela.Y%TYPE, p_z estrela.Z%TYPE, p_nome estrela.nome%TYPE DEFAULT NULL, p_classificacao estrela.classificacao%TYPE DEFAULT NULL, p_massa estrela.massa%TYPE DEFAULT NULL);
-    FUNCTION busca_estrela(p_id_estrela estrela.id_estrela%type) RETURN estrela%rowtype;
+    FUNCTION busca_estrela(p_id_estrela estrela.id_estrela%type) RETURN SYS_REFCURSOR;
     PROCEDURE edita_estrela(p_id_estrela estrela.id_estrela%type, p_id_estrela_novo estrela.id_estrela%type, p_x estrela.X%TYPE, p_y estrela.Y%TYPE, p_z estrela.Z%TYPE, p_nome estrela.nome%TYPE, p_classificacao estrela.classificacao%TYPE, p_massa estrela.massa%TYPE);
     PROCEDURE deleta_estrela(p_id_estrela estrela.id_estrela%type);
 
@@ -61,11 +61,11 @@ CREATE OR REPLACE PACKAGE BODY PacoteCientista AS
         END cria_estrela;
 
     FUNCTION busca_estrela(p_id_estrela estrela.id_estrela%type)
-        RETURN estrela%rowtype IS
-            v_estrela_retorno estrela%rowtype;
+        RETURN SYS_REFCURSOR IS
+            c_return SYS_REFCURSOR;
         BEGIN
-            select * into v_estrela_retorno from ESTRELA where ID_ESTRELA = p_id_estrela;
-            return v_estrela_retorno;
+            OPEN c_return FOR select * from ESTRELA where ID_ESTRELA = p_id_estrela;
+            return c_return;
         EXCEPTION
             WHEN NO_DATA_FOUND THEN
                 RAISE_APPLICATION_ERROR(-20006, 'Nenhuma estrela encontrada');
