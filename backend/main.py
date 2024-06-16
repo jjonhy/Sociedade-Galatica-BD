@@ -229,11 +229,11 @@ def consulta_informacoes_estrategicas():
     except Exception as e:
         raise e
     
-@app.route('/api/relatorio/cientista/<tipo>', methods=['POST'])
-def consulta_relatorio_cientista(tipo):
+@app.route('/api/relatorio/cientista/<tipo>/<limite>', methods=['POST'])
+def consulta_relatorio_cientista(tipo, limite):
     try:
         if tipo in ['planeta', 'estrela', 'sistema']:
-            relatorio = executa_funcao('Cientista', 'relatorio_{tipo}', [1000])
+            relatorio = executa_funcao('Cientista', f'relatorio_{tipo}', [limite])
         else:
             return jsonify({"message": f"Tipo de relatório não suportado: {tipo}"}), 400
         
