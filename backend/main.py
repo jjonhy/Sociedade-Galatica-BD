@@ -248,13 +248,27 @@ def consulta_relatorio_oficial(agrupamento = None):
         data = request.json
         cpi = data.get('username')
         if agrupamento in ['planeta', 'especie', 'faccao', 'sistema']:
-            relatorio = executa_funcao('Oficial', 'evolucao_habitantes_por_{agrupamento}', [cpi])
+            relatorio = executa_funcao('Oficial', f'evolucao_habitantes_por_{agrupamento}', [cpi])
         else:
             relatorio = executa_funcao('Oficial', 'evolucao_habitantes', [cpi])
         return jsonify(relatorio), 200
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
     
+@app.route('/api/relatorio/lider', defaults={'agrupamento': None}, methods=['POST'])
+@app.route('/api/relatorio/lider/<agrupamento>', methods=['POST'])
+def consulta_relatorio_lider(agrupamento):
+    try:
+        data = request.json
+        cpi = data.get('username')
+        if agrupamento in ['planeta', 'especie', 'nacao', 'sistema']:
+            relatorio = executa_funcao('Lider', f'comunidades_faccao_por_{agrupamento}', [cpi])
+        else:
+            relatorio = executa_funcao('Lider', 'comunidades_faccao', [cpi])
+        return jsonify(relatorio), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+
 def executa_funcao(pacote: str, funcao: str, parametros: list):
     try:
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
@@ -264,27 +278,6 @@ def executa_funcao(pacote: str, funcao: str, parametros: list):
                 return {"tipo": pacote, "dados": result}
     except Exception as e:
         raise e
-
-@app.route('/api/comunidades_faccao', methods=['GET'])
-def consulta_relatorio_lider():
-    try:
-        relatorio = consulta_comunidades_faccao()
-        return jsonify(relatorio), 200
-    except Exception as e:
-        return jsonify({"message": f"An error occurred: {e}"}), 500
-
-def consulta_comunidades_faccao():
-    try:
-        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
-            with connection.cursor() as cursor:
-                # Chamar a função do package PacoteLider para obter informações de evolução de habitantes
-                refcursor = cursor.callfunc('PacoteLider.comunidades_faccao', oracledb.CURSOR, session['username'])  # Substitua pelo CPI do oficial correto
-                result = refcursor.fetchall()
-                # Exemplo básico de como obter os resultados
-                return {"tipo": "lider", "dados": result}
-    except Exception as e:
-        raise e
-
 
 @app.route('/estrelas', methods=['GET', 'POST'])
 def gerenciar_estrelas():
