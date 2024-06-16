@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, session, redirect
 from flask_cors import CORS
 import oracledb
 import json
+import cx_Oracle
 
 app = Flask(__name__)
 CORS(app)  # Habilita CORS para todos os endpoints
@@ -279,38 +280,89 @@ def executa_funcao(pacote: str, funcao: str, parametros: list):
     except Exception as e:
         raise e
 
-@app.route('/estrelas', methods=['GET', 'POST'])
-def gerenciar_estrelas():
-    if request.method == 'GET':
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM ESTRELA")
-        estrelas = cursor.fetchall()
-        cursor.close()
-        return jsonify(estrelas)
-    
-    if request.method == 'POST':
-        data = request.get_json()
-        cursor = conn.cursor()
-        try:
-            cursor.callproc('PacoteCientista.cria_estrela', [data['id'], data['x'], data['y'], data['z'], data['nome'], data['classificacao'], data['massa']])
-            conn.commit()
-            return '', 201
-        except cx_Oracle.Error as error:
-            return str(error), 400
-        finally:
-            cursor.close()
-
-@app.route('/estrelas/<int:id>', methods=['DELETE'])
-def deletar_estrela(id):
-    cursor = conn.cursor()
+@app.route('/api/comunidades_faccao', methods=['GET'])
+def consulta_relatorio_lider():
     try:
-        cursor.callproc('PacoteCientista.deleta_estrela', [id])
-        conn.commit()
-        return '', 204
+        relatorio = consulta_comunidades_faccao()
+        return jsonify(relatorio), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+
+def consulta_comunidades_faccao():
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                # Chamar a função do package PacoteLider para obter informações de evolução de habitantes
+                refcursor = cursor.callfunc('PacoteLider.comunidades_faccao', oracledb.CURSOR, session['username'])  # Substitua pelo CPI do oficial correto
+                result = refcursor.fetchall()
+                # Exemplo básico de como obter os resultados
+                return {"tipo": "lider", "dados": result}
+    except Exception as e:
+        raise e
+
+
+@app.route('/criar_estrela', methods=['POST'])
+def criar_estrela():
+    data = request.json
+    id = data.get('id')
+    x = data.get('x')
+    y = data.get('y')
+    z = data.get('z')
+    nome = data.get('nome')
+    classificacao = data.get('classificacao')
+    massa = data.get('massa')
+
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                cursor.callproc('PacoteCientista.cria_estrela', [id, x, y, z, nome, classificacao, massa])
+        return jsonify({"message": "Estrela criada com sucesso"}), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+    
+@app.route('/buscar_estrela', methods=['GET'])
+def buscar_estrela():
+    id_estrela = request.args.get('id_estrela')
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                result = cursor.callfunc('busca_estrela', cx_Oracle.OBJECT, [id_estrela])
+                return jsonify({"message": "Estrela encontrada com sucesso", "data": result}), 200
     except cx_Oracle.Error as error:
-        return str(error), 400
-    finally:
-        cursor.close()
+        return jsonify({"message": f"An error occurred: {error}"}), 500
+
+@app.route('/editar_estrela', methods=['PUT'])
+def editar_estrela():
+    data = request.json
+    id_estrela = data.get('id')
+    novo_id_estrela = data.get('idNovo')
+    x = data.get('x')
+    y = data.get('y')
+    z = data.get('z')
+    nome = data.get('nome')
+    classificacao = data.get('classificacao')
+    massa = data.get('massa')
+    
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                cursor.callproc('PacoteCientista.edita_estrela', [id_estrela, novo_id_estrela, x, y, z, nome, classificacao, massa])
+                connection.commit()
+                return jsonify({"message": "Estrela editada com sucesso"}), 200
+    except cx_Oracle.Error as error:
+        return jsonify({"message": f"An error occurred: {error}"}), 500
+
+@app.route('/deletar_estrela/<id_estrela>', methods=['DELETE'])
+def deletar_estrela(id_estrela):
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            with connection.cursor() as cursor:
+                cursor.callproc('PacoteCientista.deleta_estrela', [id_estrela])
+                connection.commit()
+                return jsonify({"message": "Estrela deletada com sucesso"}), 200
+    except cx_Oracle.Error as error:
+        return jsonify({"message": f"An error occurred: {error}"}), 500
+
 
 @app.route('/relatorios/<string:tipo>', methods=['GET'])
 def relatorios(tipo):
