@@ -312,14 +312,14 @@ def criar_estrela():
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
     
-@app.route('/buscar_estrela', methods=['GET'])
+@app.route('/buscar_estrela', methods=['POST'])
 def buscar_estrela():
     id_estrela = request.args.get('id_estrela')
     try:
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
-                result = cursor.callfunc('busca_estrela', cx_Oracle.OBJECT, [id_estrela])
-                return jsonify({"message": "Estrela encontrada com sucesso", "data": result}), 200
+                resultado = executa_funcao('Cientista', 'busca_estrela', [id_estrela])
+                return jsonify(resultado), 200
     except cx_Oracle.Error as error:
         return jsonify({"message": f"An error occurred: {error}"}), 500
 
