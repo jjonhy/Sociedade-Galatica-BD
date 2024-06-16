@@ -32,7 +32,7 @@ export const Oficial = () => {
 
   const exibirRelatorioOficial = async () => {
     try {
-      const response = await axios.get('/api/relatorio/oficial');
+      const response = await axios.get('http://localhost:5000/api/relatorio/oficial');
       setRelatorio(response.data.dados); // Atualiza o estado com os dados do relatório
     } catch (error) {
       console.error('Erro ao obter relatório oficial:', error);

@@ -213,10 +213,12 @@ def consulta_evolucao_habitantes_oficial():
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 # Chamar a função do package PacoteOficial para obter informações de evolução de habitantes
-                cursor.callproc('PacoteOficial.evolucao_habitantes', ['111.111.111-15'])  # Substitua pelo CPI do oficial correto
+                refcursor = cursor.callfunc('PacoteOficial.evolucao_habitantes', oracledb.CURSOR, ['111.111.111-15'])  # Substitua pelo CPI do oficial correto
                 # Exemplo básico de como obter os resultados
-                result = cursor.fetchall()
-                return {"tipo": "oficial", "dados": result}
+                for row in refcursor:
+                    print(row)
+                # result = refcursor.fetchall()
+                # return {"tipo": "oficial", "dados": result}
     except Exception as e:
         raise e
 
