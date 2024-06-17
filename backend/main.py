@@ -43,6 +43,17 @@ def login():
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    data = request.json
+    username = data.get('uid')
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            log_operation(username, f"{username} deslogou")
+        return jsonify({"message": "Logout bem-sucedido"}), 200
+    except Exception as e:
+        return jsonify({"message": f"An error occurred: {e}"}), 500
+
 @app.route('/role', methods=['POST'])
 def get_role():
     data = request.json

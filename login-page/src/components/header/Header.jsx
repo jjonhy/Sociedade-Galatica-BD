@@ -3,6 +3,7 @@ import { Container } from "reactstrap";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 import "./Header.css";
 
@@ -18,14 +19,17 @@ const Header = () => {
 
   var { isAuthenticated, role } = useContext(AuthContext);
 
-  const handleLogout = () => {
+  const handleLogout = async (e) => {
     console.log("Logging out");
+    var uid = localStorage.getItem("username")
+    await axios.post('http://localhost:5000/logout', {  uid: uid });
     localStorage.removeItem('username');
     isAuthenticated = false;
     role = '';
     navigate('/');
     window.location.reload(); // Recarrega a página após o redirecionamento
   };
+
   console.log(role);
 
   return (
