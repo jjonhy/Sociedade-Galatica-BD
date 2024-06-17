@@ -4,10 +4,16 @@ CREATE TABLE Users (
     password VARCHAR2(32)
 )
 
+-- Executar para adicionar os lideres a tabela de usuarios e colocar senha padrão: 123
+
 insert into users(idlider) select cpi from lider;
 
 update users set password = 123;
 commit;
+
+select * from users;
+
+-- fim da execucao
 
 ALTER TABLE Users ADD CONSTRAINT pk_users PRIMARY KEY (userId);
 ALTER TABLE Users ADD CONSTRAINT uq_idLider UNIQUE (idLider);

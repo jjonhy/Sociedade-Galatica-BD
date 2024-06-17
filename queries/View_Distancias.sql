@@ -69,9 +69,21 @@ FROM TABLE(dbms_xplan.display());
 -- Nao foi criado ainda (demora MUITO)
 CREATE INDEX IDX_ESTRELAS_DISTANCIAS_1 ON ESTRELAS_DISTANCIAS(Estrela1, Estrela2);
 
+CREATE INDEX IDX_ESTRELAS_DISTANCIAS_2 ON ESTRELAS_DISTANCIAS(Estrela2, Estrela1);
+
 explain plan for
 SELECT * FROM ESTRELAS_DISTANCIAS WHERE Estrela1 = '1' AND Estrela2 = '9';
 SELECT plan_table_output
 FROM TABLE(dbms_xplan.display());
+
+/*
+--------------------------------------------------------------------------------------------------------------------
+| Id  | Operation                              | Name                      | Rows  | Bytes | Cost (%CPU)| Time     |
+--------------------------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                       |                           |     1 |    39 |     4   (0)| 00:00:01 |
+|   1 |  MAT_VIEW ACCESS BY INDEX ROWID BATCHED| ESTRELAS_DISTANCIAS       |     1 |    39 |     4   (0)| 00:00:01 |
+|*  2 |   INDEX RANGE SCAN                     | IDX_ESTRELAS_DISTANCIAS_2 |     1 |       |     3   (0)| 00:00:01 |
+--------------------------------------------------------------------------------------------------------------------
+*/
 
 -- FIM_TESTES
