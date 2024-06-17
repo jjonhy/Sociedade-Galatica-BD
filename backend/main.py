@@ -240,13 +240,12 @@ def inserir_dominancia():
 def consulta_informacoes_estrategicas():
     try:
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
-            collection_type1 = connection.gettype("PacoteComandante.T_INFORMACOES_1_TYPE")
+            collection_type2 = connection.gettype("PacoteComandante.T_INFORMACOES_2")
+            collection_type1 = connection.gettype("PacoteComandante.T_INFORMACOES_1")
+            collection1 = collection_type1.newobject()
+            collection2 = collection_type2.newobject()
             with connection.cursor() as cursor:
                 # Criar tipos de dados Oracle para os parâmetros de saída
-                collection_type2 = cursor.connection.gettype("PacoteComandante.T_INFORMACOES_2_TYPE")
-                collection1 = collection_type1.newobject()
-                collection2 = collection_type2.newobject()
-
                 # Chamar a procedure do package PacoteComandante para obter informações estratégicas
                 cursor.callproc('PacoteComandante.consulta_informacoes_estrategicas', [collection1, collection2])
 
@@ -260,9 +259,9 @@ def consulta_planetas_em_potencial():
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 # Criar tipos de dados Oracle para os parâmetros de saída
-                result = executa_funcao('Comandante', 'consulta_planetas_em_potencial', [])
+                result = executa_funcao('Comandante', 'planetas_em_potencial', [])
 
-                return {"planetas": collection.aslist()}
+                return jsonify(result), 200
     except Exception as e:
         raise e
 
