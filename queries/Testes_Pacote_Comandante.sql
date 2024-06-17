@@ -116,4 +116,25 @@ INSERT INTO	DOMINANCIA VALUES('marte', 'brasil', TO_DATE('2011-02-01', 'yyyy-mm-
 
 SELECT * FROM ORBITA_ESTRELA;
 
+select * from PLANETA;
+DECLARE
+    l_cursor SYS_REFCURSOR;
+
+    v_id_astro PLANETA.id_astro%type;
+    v_massa PLANETA.massa%type;
+    v_raio PLANETA.raio%type;
+    v_classificacao PLANETA.classificacao%type;
+    v_sistema Sistema.nome%type;
+BEGIN
+    l_cursor := PacoteComandante.planetas_em_potencial();
+
+    LOOP FETCH l_cursor INTO v_id_astro, v_massa, v_raio, v_classificacao, v_sistema;
+        EXIT WHEN l_cursor%NOTFOUND;
+
+        DBMS_OUTPUT.PUT_LINE(v_id_astro || ' ' || v_massa || ' ' || v_raio || ' ' || v_classificacao || ' ' || v_sistema);
+    END LOOP;
+
+    CLOSE l_cursor;
+END;
+
 -- FIM Testes

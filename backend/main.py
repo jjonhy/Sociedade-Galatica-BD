@@ -236,28 +236,36 @@ def inserir_dominancia():
     except Exception as e:
         return jsonify({"message": f"An error occurred: {e}"}), 500
 
+@app.route('/api/relatorio/comandante/informacoes_estrategicas', methods=['POST'])
 def consulta_informacoes_estrategicas():
+    try:
+        with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
+            collection_type1 = connection.gettype("PacoteComandante.T_INFORMACOES_1_TYPE")
+            with connection.cursor() as cursor:
+                # Criar tipos de dados Oracle para os parâmetros de saída
+                collection_type2 = cursor.connection.gettype("PacoteComandante.T_INFORMACOES_2_TYPE")
+                collection1 = collection_type1.newobject()
+                collection2 = collection_type2.newobject()
+
+                # Chamar a procedure do package PacoteComandante para obter informações estratégicas
+                cursor.callproc('PacoteComandante.consulta_informacoes_estrategicas', [collection1, collection2])
+
+                return {"informacoes_1": collection1.aslist(), "informacoes_2": collection2.aslist()}
+    except Exception as e:
+        raise e
+
+@app.route('/api/relatorio/comandante/planetas_em_potencial', methods=['POST'])
+def consulta_planetas_em_potencial():
     try:
         with oracledb.connect(user=un, password=pw, dsn=dsn) as connection:
             with connection.cursor() as cursor:
                 # Criar tipos de dados Oracle para os parâmetros de saída
-                type_informacoes_1 = cursor.var(oracledb.DB_TYPE_OBJECT, typename="T_INFORMACOES_1_TYPE", arraysize=100)
-                type_informacoes_2 = cursor.var(oracledb.DB_TYPE_OBJECT, typename="T_INFORMACOES_2_TYPE", arraysize=100)
+                result = executa_funcao('Comandante', 'consulta_planetas_em_potencial', [])
 
-                # Chamar a procedure do package PacoteComandante para obter informações estratégicas
-                cursor.callproc('PacoteComandante.consulta_informacoes_estrategicas', [type_informacoes_1, type_informacoes_2])
-
-                # Obter os resultados dos parâmetros de saída
-                informacoes_1 = type_informacoes_1.getvalue()
-                informacoes_2 = type_informacoes_2.getvalue()
-
-                result_1 = [dict(zip(row.keys(), row)) for row in informacoes_1]
-                result_2 = [dict(zip(row.keys(), row)) for row in informacoes_2]
-
-                return {"informacoes_1": result_1, "informacoes_2": result_2}
+                return {"planetas": collection.aslist()}
     except Exception as e:
         raise e
-    
+
 @app.route('/api/relatorio/cientista/<tipo>/<limite>', methods=['POST'])
 def consulta_relatorio_cientista(tipo, limite):
     try:

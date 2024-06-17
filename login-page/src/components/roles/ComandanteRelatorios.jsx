@@ -5,7 +5,7 @@ const Relatorios = () => {
   const exibirRelatorio = async (tipo) => {
     console.log(tipo)
     try {
-      const response = await axios.get(`/api/relatorio/${tipo}`);
+      const response = await axios.post(`http://localhost:5000/api/relatorio/comandante/informacoes_estrategicas`);
       console.log(response.data); // Aqui você pode fazer algo com os dados do relatório, como atualizar o estado no componente React
     } catch (error) {
       console.error('Erro ao obter relatório:', error);
