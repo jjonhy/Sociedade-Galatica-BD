@@ -8,3 +8,15 @@ insert into users(idlider) select cpi from lider;
 
 update users set password = 123;
 commit;
+
+ALTER TABLE Users ADD CONSTRAINT pk_users PRIMARY KEY (userId);
+ALTER TABLE Users ADD CONSTRAINT uq_idLider UNIQUE (idLider);
+
+CREATE TABLE LOG_TABLE (
+    logId NUMBER GENERATED ALWAYS AS IDENTITY(START WITH 1 INCREMENT BY 1),
+    userId VARCHAR2(15),
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    message VARCHAR2(255),
+    CONSTRAINT pk_log_table PRIMARY KEY (logId),
+    CONSTRAINT fk_user FOREIGN KEY (userId) REFERENCES Users(idLider)
+);
